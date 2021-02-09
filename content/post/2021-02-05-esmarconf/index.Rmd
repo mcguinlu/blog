@@ -1,0 +1,16 @@
+---
+title: ESMARconf
+author: Luke McGuinness
+date: '2021-02-05'
+slug: esmarconf
+categories:
+  - R
+tags: []
+math: no
+meta: yes
+toc: no
+draft: true
+---
+
+
+<!--more-->

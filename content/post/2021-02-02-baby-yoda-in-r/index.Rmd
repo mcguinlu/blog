@@ -1,0 +1,18 @@
+---
+title: Baby Yoda in R
+author: Luke McGuinness
+date: '2021-02-02'
+slug: baby-yoda-in-r
+categories:
+  - R
+  - side-project
+  - Lego
+tags: []
+math: no
+meta: yes
+toc: no
+draft: true
+---
+
+
+<!--more-->

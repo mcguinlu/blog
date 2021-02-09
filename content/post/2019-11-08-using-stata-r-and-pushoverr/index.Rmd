@@ -1,0 +1,304 @@
+---
+title: "Using Stata in R with RStata and pushoverr"
+author: Luke McGuinness
+date: '2021-01-01'
+output:
+  tufte::tufte_html: default
+slug: using-stata-r-and-pushoverr
+categories: ["R", "Stata"]
+tags: []
+math: no
+meta: yes
+excerpt: "Using R makes running long Stata scripts much easier (& more fun?)"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+sn <- 0
+# <sup>`r (sn <- sn+1)`</sup> `r tufte::margin_note(paste0("<sup>",sn,"</sup>"))`
+```
+
+`r tufte::newthought("I recently took over a project")` that made use of Stata to perform the analysis and subsequently used R<sup>`r (sn <- sn+1)`</sup> `r tufte::margin_note(paste0("<sup>",sn,"</sup>Pronounced \"oar\""))` to create plots of the results. 
+
+Inspired by this [blogpost](https://fsolt.org/blog/2018/08/15/switch-to-r.html) from Frederick Solt, I wanted to see if I could set up my project to run start-to-finish from a single script (i.e. could I call Stata efficiently from R to perform the analysis, and then immediately use R to plot the results?) and have R notify me when it was complete.
+
+
+__TL;DR - This is entirely possible and makes running long Stata scripts much easier (& more fun?).__
+
+<hr>
+
+## __Aims__
+
+As part of this experiment, I wanted to:
+
+  * get Stata and R working well together; and
+
+  * send a notification to my phone when a long running Stata script was complete.
+
+<hr>
+
+## __Aim #1. Get Stata and `R` working well together__
+
+My initial approach was to set up a RStudio project, and rearrange the scripts and data I had received into a familiar structure:
+
+    .
+    +-- code
+    |   +-- .do files
+    |   +-- .R scripts
+    +-- data
+    +-- output
+    +-- reports
+    +-- manuscript
+    +-- supplement
+    +-- Config - STATA.do  # Configuration file for Stata
+    +-- Config - R.R       # Configuration file for R
+
+The previous owner of the project had set up a configuration file for both Stata and R, which when run, would source the relevant `.do` files and `.R` scripts from the `code` folder in the correct order. 
+
+For example, the `Config - STATA.do` file set the necessary global paths and then ran a series of `.do` files to process the raw data, generate the basic cohort, add covariates, calculate summary statistics for the cohort, calculate the frequency of missing data for each important covariate, and then finally perform the analysis of interest:
+
+<a id="stata-basic"></a>
+```{}
+# Config - STATA.do
+
+  * Set global paths -----------------------------------------------------------
+    
+  global path "path/to/project/folder"
+  global dofiles "$path/code"
+  global output "$path/output"
+  global data "$path/data"
+  
+  * Run dictionary -------------------------------------------------------------
+  
+  run "$dofiles/codedict.do"
+  
+  * Generate cohort ------------------------------------------------------------
+
+  run "$dofiles/cohort2.do"
+  
+  * Add covariates (Note: cov.do requires cov_*.do) ----------------------------
+  
+  run "$dofiles/cov2.do"
+  
+  * Generate data for Table 1 --------------------------------------------------
+  
+  run "$dofiles/toc.do"
+  
+  * Generate data on missing covariate information -----------------------------
+  
+  run "$dofiles/missingdata.do"
+  
+  * Run Cox regression analysis ------------------------------------------------
+  
+  run "$dofiles/analysis2.do"
+```
+
+
+Similarly , the `Config - R.R` file loaded the necessary libraries and then sourced the scripts to build the three plots. 
+
+<a id="r-basic"></a>
+```{r}
+# Config- R.R
+
+  # Setup ======================================================================
+  library(ggplot2)
+  
+  # Plot analysis results ======================================================
+  
+  source("code/plot_cohort2_attrition.R")
+  
+  source("code/plot_main_forest_plots.R")
+  
+  source("code/plot_age_forest_plots.R")
+
+```
+
+
+To begin with, I would run each of these files seperately, one after the other, which worked perfectly but ran against my aim of being able to run the whole project with a single command.
+
+To begin to address this, I created a new `master.R` script which would call both the `Config - STATA.do` and the `Config - R.R` files. The dependency tree for the new set-up looked like this:
+
+    master.R
+    +-- Config - STATA.do
+    |   +-- code
+    |   |   +-- .do files
+    +-- Config - R.R
+    |   +-- code
+    |   |   +-- .R scripts
+
+
+To call Stata from R, I used the `RStata` [package](https://cran.r-project.org/web/packages/RStata/index.html), built by [Luca Braglia](https://github.com/lbraglia), which allows users to execute Stata commands (both inline and from a .do file) from within R itself (the name is a bit of a give-away). You just need to provide the path to your `.do` file, the path to your Stata executable (`stata.path`), the version of Stata you have (`stata.version`) and whether you want to print Stata text output to the console (`stata.echo`) as arguments.
+
+<a id="master"></a>
+```{r}
+# master.R - Version 1
+
+  # Analysis ===================================================================
+  RStata::stata("Config - Stata.do",
+                stata.path = "\"A:\\Stata\\Stata15_MP\\StataMP-64\"",
+                stata.version = 15,
+                stata.echo = TRUE)
+
+
+  # Plotting ===================================================================
+  source("Config - R.R")
+```
+
+<br>
+
+### A note on network drives
+
+I initially ran into some issues in using `RStata` as I couldn't get it to find where the Stata executable was stored. 
+
+In Bristol, Stata is kept on a network drive (`\\ads.bris.ac.uk\`) which I was pretty sure was the root of the problem. After a lot of reading, an indirect fix came from [this answer](https://stackoverflow.com/a/55249514) to a SlackOverflow question on why a `rmarkdown` file would not knit on a network drive.
+
+Essentially, it turns out that R isn't great at dealing with arbitrary URLs for shared network drives, and so [mapping](https://www.laptopmag.com/articles/map-network-drive-windows-10) the network drive to a local lettered drive in the Windows File Explorer sorted it out. You just need to remember to update the path in the `Config - STATA.do`, to replace the `\\ads.bris.ac.uk\` portion with the corresponding letter:
+
+```{r}
+# Fix issue with network drives
+
+  # Replace 
+  RStata::stata("Config - Stata.do",
+                stata.path = "\"\\ads.bris.ac.uk\\path\\to\\stata\"", #
+                stata.version = 15,
+                stata.echo = TRUE)
+  
+  # with
+  RStata::stata("Config - Stata.do",
+                stata.path = "\"A:\\path\\to\\stata\"", # 
+                stata.version = 15,
+                stata.echo = TRUE)
+```
+<br>
+<hr>
+
+## __Aim #2. Send a notification to my phone when a long running Stata script is complete.__
+
+For some of the analysis performed, running the `Config - STATA.do` file would take >4 hours. In this case, I thought it would be useful to have someway of the script telling me that it was finished, so I could go out and have a walk/coffee or work on other things without feeling the need to constantly check on the progress.
+
+To achieve this, I used the `pushoverr` package, which allows you to send notifications to the pushover app on your phone via R. I found this [blogpost](https://bconnelly.net/posts/r-phone-home/) by Brian Connelly very helpful when getting started with `pushoverr`. 
+
+The only downside to Pushover as a system is that after a 7 day trial period, there is a cost of ~£4 to activate the app fully - but personally I think it's worth it! 
+
+So having added `pushoverr`, my `master.R` file now looked like this:
+
+<a id="master-2"></a>
+```{r}
+# master.R - Version 2
+
+  # Analysis ===================================================================
+  RStata::stata("Config - Stata.do",
+                stata.path = "\"A:\\Stata\\Stata15_MP\\StataMP-64\"",
+                stata.version = 15,
+                stata.echo = TRUE)
+  
+  pushoverr::pushover(message = 'Analysis complete.')
+  
+  # Plotting ===================================================================
+  source("Config - R.R")
+  
+  pushoverr::pushover(message='Plotting complete.')
+
+```
+
+By this point, I was cresting the ["Peak of inflated expectations"](https://en.wikipedia.org/wiki/Hype_cycle) and was feeling very pleased with myself. It didn't last very long however due to one important limitation of the `RStata` package . . . 
+
+
+<br>
+
+### Error handling
+
+While the `RStata` package is great, one area where it fell down significantly was in how it handles Stata errors - put simply, it doesn't handle them at all. It prints the resulting error message to the console but crucially does not prevent the rest of the R script from running. In practice, this meant in the `master.R` file [above](#master-2), if Stata encountered an error when executing the `Config - STATA.do` file, `pushoverr` would still send me the "Analysis complete" message. Not good. 
+
+This was particularly problematic in this specific project, as the R scripts to produce the plots depend directly on the outputs produced by the analysis. Therefore, if the `Config - STATA.do` step fails but the rest of the R script runs, the resulting graphs will be based on obsolete/incorrect data. 
+
+In order to solve this, I added the following line to the `Config - STATA.do` file, right at the end:
+
+```{}
+# Add to the very end of 'Config - STATA.do'
+
+  clear
+  set obs 0
+  gen pushover = ""
+  save "$path/pushover.dta"
+  
+```
+
+This saves an empty "indicator" Stata dataset (`pushover.dta`) in the top level folder, which you can then use with `file.exist()` to confirm that the `Config - STATA.do` file ran all the way through and did not produce any errors. 
+
+I combined this with a `pushoverr`  so that it would now send me a message telling me whether the analysis had completed successfully or had erred. This resulted in some additional changes to my `master.R` file looked, which now looked something like this:
+
+<a id="master-3"></a>
+```{r}
+# master.R - Version 3
+  
+  # Setup ======================================================================
+  source("code/pushover.R")
+  
+  push_clean() # Remove pushoverr indicator file
+  
+  # Analysis ===================================================================
+  RStata::stata("Config - Stata.do",
+                stata.path = "\"A:\\Stata\\Stata15_MP\\StataMP-64\"",
+                stata.version = 15,
+                stata.echo = TRUE)
+  
+  push_analysis() # Send pushoverr notification to phone on analysis status
+  
+  # Plot main analysis results =================================================
+  source("Config - R.R")
+  
+  push_plotting() # Send pushoverr notification to phone on plotting status
+```
+
+The `pushover.R` file contains the three `push_*()` functions seen in `master.R` above: 
+
+```{r}
+#pushover.R
+
+  push_clean <- function() {
+    try(file.remove("pushover.dta"))
+  }
+  
+  push_analysis <- function() {
+    if (file.exists("pushover.dta") == TRUE) {
+      pushoverr::pushover(message = 'Analysis complete.')
+    } else{
+      pushoverr::pushover(message = 'Analysis errored.')
+    }
+    file.remove("pushover.dta")
+  }
+  
+  push_plotting <- function() {
+    pushoverr::pushover(message='Plotting complete.')
+  }
+```
+
+To elaborate on the purpose of these functions:
+
+* `push_clean()`: ensures the indicator file does not already exist in the top level folder and removes it if it does. 
+* `push_analysis()`: checks whether the indicator file exists. If it does, `pushoverr` sends a message saying the analysis was a success. If it doesn't, a message saying the analysis errored is sent instead.
+* `push_plotting()`: this was written mainly to save me typing the same `pushoverr` command over and over
+
+
+<br>
+
+### A note on reproducibility
+
+I was showing this set-up to a colleague who asked why I needed a `master.R` file at all, in other words why not just have the `Config - R.R` file call Stata and send the `pushoverr` notifications?
+
+The primary reason for this is that it is an effort to lower the effort required to reproduce the analysis. Both `master.R` and `pushover.R` were added to `.gitignore` and do not appear in the GitHub repo for this project. This removes the need for users to try and set-up `RStata` and `pushoverr` by encouraging them to run the `Config` files themselves in sequence. 
+
+This is the best set-up I found that maximises my efficiency when developing the project but also maintains the ease of reproducibility by removing dependencies on hard-to-configure packages.
+
+<hr>
+
+## __Final word__
+
+I had a look on Twitter to see if there were any other methods people used to signify that a script was complete and came across this tweet from Anna Kautto:  
+
+
+<blockquote class="twitter-tweet" data-partner="tweetdeck"><p lang="en" dir="ltr">Today I made my R script say &quot;I have the answer to the great question though I dont think you are going to like it&quot; out loud after finishing calculating. <a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a> <a href="https://twitter.com/hashtag/deepthought?src=hash&amp;ref_src=twsrc%5Etfw">#deepthought</a> <a href="https://twitter.com/hashtag/glmer?src=hash&amp;ref_src=twsrc%5Etfw">#glmer</a> <a href="https://twitter.com/hashtag/phdchat?src=hash&amp;ref_src=twsrc%5Etfw">#phdchat</a></p>&mdash; Anna Kautto (@annakau) <a href="https://twitter.com/annakau/status/1193867657772187648?ref_src=twsrc%5Etfw">November 11, 2019</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>  
+
+While I think the idea of my computer unexpectedly talking to me would likely make me jump and spill tea everywhere, I love the idea and may update the content of my `pushoverr` notifications to something a bit more fun!

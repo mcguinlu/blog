@@ -1,0 +1,18 @@
+---
+title: Formatting platform-agnostic file paths 
+author: Luke McGuinness
+date: '2021-02-02'
+slug: pathformatr 
+categories:
+  - R
+tags: []
+math: no
+meta: yes
+draft: true
+---
+
+## The problem 
+
+File paths using `here`
+
+## The solution

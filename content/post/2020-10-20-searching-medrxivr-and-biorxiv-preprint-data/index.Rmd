@@ -21,9 +21,13 @@ sn <- 0
 
 *Note: cross-posted with [the rOpenSci blog](https://ropensci.org/blog/2020/10/20/searching-medrxivr-and-biorxiv-preprint-data/).*
 
+## Background and motivation
+
 [medRxiv](https://www.medrxiv.org/), as the preprint repository for papers in the medical, clinical, and related health sciences,<sup>`r (sn <- sn+1)`</sup> `r tufte::margin_note(paste0("<sup>",sn,"</sup>Rawlinson, C., & Bloom, T. (2019). New preprint server for medical research. BMJ, 365. <https://doi.org/doi:10.1136/bmj.l2301>"))` has become a central source of new studies related to the COVID-19 pandemic. As a result, more and more researchers have begun to include medRxiv in the list of bibliographic databases they search as part of systematic reviews, a type of study that aims to find and bring together all available evidence on a topic in order to provide a comprehensive answer to a research question.
 
 However, the native search functionality available on the medRxiv website is not suitable for use in systematic reviews due to a number of limitations. This prompted the development of [medrxivr](https://docs.ropensci.org/medrxivr), an R package which provides access to, and tools for searching, medRxiv and bioRxiv preprint metadata. This post will detail the limitations of the native medRxiv search and summarize the key functionality of medrxivr via two key use cases. Note that while medrxivr allows users to access and search medrxiv and bioRxiv preprint metadata as both repositories are run by the Cold Spring Harbor Laboratory and so have a similar API endpoint/native website search functionality, all illustrating examples in this post are taken from medRxiv.
+
+<hr>
 
 ## Limitations of medRxiv website search functionality
 
@@ -43,7 +47,7 @@ Any systematic reviewer will tell you that for a database to be useful as an inf
 
 This means that records returned by a search must be exported by hand in small batches, an error-prone and time-consuming (not to mention anger-inducing!) method of extracting citations from a bibliographic database.
 
-<br>
+<hr>
 
 ## Use cases
 
@@ -83,7 +87,7 @@ mx_data %>%
 
 While being able to easily import medRxiv data is useful, as a systematic reviewer, my main interest is in what medrxivr allows you to do once you have imported a local copy of the database. As mentioned in the section above, the native medRxiv website search interface is neither reproducible nor transparent, and while the API (accessed via `mx_api_content()`) is great for accessing medRxiv metadata, it does not offer any search functionality. The second core aspect of medrxivr's functionality is designed to address these limitations, allowing information specialists to build complex searches and apply them to a local copy of the medRxiv database, all while documenting their search strategy in a transparent manner. An example is given below, where a researcher is looking for records that contain both dementia-related and lipid-related terms:
 
-``` {r, R.options=list(width=100)}
+``` {r, R.options=list(width=100), class.output="fullwidth-output", message = FALSE}
 
 # Use the maintained snapshot to quickly load today's copy of the medRxiv database
 # Note - this `preprint_data` object could be saved as a CSV in your project 

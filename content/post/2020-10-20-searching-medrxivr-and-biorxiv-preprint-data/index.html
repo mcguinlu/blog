@@ -16,8 +16,12 @@ excerpt: "The medrxivr package allows users to import and search medRxiv and bio
 
 
 <p><em>Note: cross-posted with <a href="https://ropensci.org/blog/2020/10/20/searching-medrxivr-and-biorxiv-preprint-data/">the rOpenSci blog</a>.</em></p>
+<div id="background-and-motivation" class="section level2">
+<h2>Background and motivation</h2>
 <p><a href="https://www.medrxiv.org/">medRxiv</a>, as the preprint repository for papers in the medical, clinical, and related health sciences,<sup>1</sup> <label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"><sup>1</sup>Rawlinson, C., &amp; Bloom, T. (2019). New preprint server for medical research. BMJ, 365. <a href="https://doi.org/doi:10.1136/bmj.l2301" class="uri">https://doi.org/doi:10.1136/bmj.l2301</a></span> has become a central source of new studies related to the COVID-19 pandemic. As a result, more and more researchers have begun to include medRxiv in the list of bibliographic databases they search as part of systematic reviews, a type of study that aims to find and bring together all available evidence on a topic in order to provide a comprehensive answer to a research question.</p>
 <p>However, the native search functionality available on the medRxiv website is not suitable for use in systematic reviews due to a number of limitations. This prompted the development of <a href="https://docs.ropensci.org/medrxivr">medrxivr</a>, an R package which provides access to, and tools for searching, medRxiv and bioRxiv preprint metadata. This post will detail the limitations of the native medRxiv search and summarize the key functionality of medrxivr via two key use cases. Note that while medrxivr allows users to access and search medrxiv and bioRxiv preprint metadata as both repositories are run by the Cold Spring Harbor Laboratory and so have a similar API endpoint/native website search functionality, all illustrating examples in this post are taken from medRxiv.</p>
+<hr>
+</div>
 <div id="limitations-of-medrxiv-website-search-functionality" class="section level2">
 <h2>Limitations of medRxiv website search functionality</h2>
 <div id="confusing-information-about-boolean-operators" class="section level3">
@@ -33,7 +37,7 @@ excerpt: "The medrxivr package allows users to import and search medRxiv and bio
 <h3>No batch export</h3>
 <p>Any systematic reviewer will tell you that for a database to be useful as an information source, the one thing it <strong>needs</strong> to have is an option to export the results of a given search <em>en masse</em>. At present, this is not something the medRxiv website supports.</p>
 <p>This means that records returned by a search must be exported by hand in small batches, an error-prone and time-consuming (not to mention anger-inducing!) method of extracting citations from a bibliographic database.</p>
-<p><br></p>
+<hr>
 </div>
 </div>
 <div id="use-cases" class="section level2">
@@ -71,20 +75,20 @@ mx_data %&gt;%
 <pre class="r"><code># Use the maintained snapshot to quickly load today&#39;s copy of the medRxiv database
 # Note - this `preprint_data` object could be saved as a CSV in your project 
 #        repository to aid reproducibility
-preprint_data &lt;- mx_snapshot()</code></pre>
-<pre><code>## Using medRxiv snapshot - 2021-02-09 00:26</code></pre>
-<pre class="r"><code># Build your search
+preprint_data &lt;- mx_snapshot()
+
+# Build your search
 topic1  &lt;- c(&quot;dementia&quot;,&quot;vascular&quot;,&quot;alzheimer&#39;s&quot;)  # Combined with Boolean OR
 topic2  &lt;- c(&quot;lipids&quot;,&quot;statins&quot;,&quot;cholesterol&quot;)     # Combined with Boolean OR
 myquery &lt;- list(topic1, topic2)                    # Combined with Boolean AND
 
 # Run your search
 results &lt;- mx_search(data = preprint_data,
-                     query = myquery)</code></pre>
-<pre><code>## Found 72 record(s) matching your search.</code></pre>
-<pre class="r"><code># Let&#39;s have a look at the returned records
+                     query = myquery)
+
+# Let&#39;s have a look at the returned records
 results</code></pre>
-<pre><code>## # A tibble: 72 x 14
+<pre class="fullwidth-output"><code>## # A tibble: 72 x 14
 ##       ID title abstract authors date       category doi   version author_correspo~ author_correspo~
 ##    &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;   &lt;date&gt;     &lt;chr&gt;    &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;           
 ##  1   181 Exce~ &quot;Object~ De Lim~ 2019-07-25 Cardiov~ 10.1~       1 Andrei C Sposito &quot;Laboratory of ~

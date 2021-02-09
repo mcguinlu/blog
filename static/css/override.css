@@ -491,6 +491,12 @@ pre.code {
   overflow-x: scroll; 
 }
 
+
+.fullwidth-output { 
+  width: 90%;
+  clear: both; 
+}
+
 .fullwidth { 
   max-width: 90%;
   clear: both; 

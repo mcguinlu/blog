@@ -16,11 +16,8 @@ excerpt: "The medrxivr package allows users to import and search medRxiv and bio
 
 
 <p><em>Note: cross-posted with <a href="https://ropensci.org/blog/2020/10/20/searching-medrxivr-and-biorxiv-preprint-data/">the rOpenSci blog</a>.</em></p>
-<div id="background-motivation" class="section level2">
-<h2>Background &amp; motivation</h2>
 <p><a href="https://www.medrxiv.org/">medRxiv</a>, as the preprint repository for papers in the medical, clinical, and related health sciences,<sup>1</sup> <label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"><sup>1</sup>Rawlinson, C., &amp; Bloom, T. (2019). New preprint server for medical research. BMJ, 365. <a href="https://doi.org/doi:10.1136/bmj.l2301" class="uri">https://doi.org/doi:10.1136/bmj.l2301</a></span> has become a central source of new studies related to the COVID-19 pandemic. As a result, more and more researchers have begun to include medRxiv in the list of bibliographic databases they search as part of systematic reviews, a type of study that aims to find and bring together all available evidence on a topic in order to provide a comprehensive answer to a research question.</p>
 <p>However, the native search functionality available on the medRxiv website is not suitable for use in systematic reviews due to a number of limitations. This prompted the development of <a href="https://docs.ropensci.org/medrxivr">medrxivr</a>, an R package which provides access to, and tools for searching, medRxiv and bioRxiv preprint metadata. This post will detail the limitations of the native medRxiv search and summarize the key functionality of medrxivr via two key use cases. Note that while medrxivr allows users to access and search medrxiv and bioRxiv preprint metadata as both repositories are run by the Cold Spring Harbor Laboratory and so have a similar API endpoint/native website search functionality, all illustrating examples in this post are taken from medRxiv.</p>
-</div>
 <div id="limitations-of-medrxiv-website-search-functionality" class="section level2">
 <h2>Limitations of medRxiv website search functionality</h2>
 <div id="confusing-information-about-boolean-operators" class="section level3">

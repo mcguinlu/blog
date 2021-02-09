@@ -30,7 +30,6 @@ __TL;DR - This is entirely possible and makes running long Stata scripts much ea
 As part of this experiment, I wanted to:
 
   * get Stata and R working well together; and
-
   * send a notification to my phone when a long running Stata script was complete.
 
 <hr>
@@ -274,9 +273,9 @@ The `pushover.R` file contains the three `push_*()` functions seen in `master.R`
 
 To elaborate on the purpose of these functions:
 
-* `push_clean()`: ensures the indicator file does not already exist in the top level folder and removes it if it does. 
-* `push_analysis()`: checks whether the indicator file exists. If it does, `pushoverr` sends a message saying the analysis was a success. If it doesn't, a message saying the analysis errored is sent instead.
-* `push_plotting()`: this was written mainly to save me typing the same `pushoverr` command over and over
+  *  `push_clean()`: ensures the indicator file does not already exist in the top level folder and removes it if it does. 
+  *  `push_analysis()`: checks whether the indicator file exists. If it does, `pushoverr` sends a message saying the  analysis was a success. If it doesn't, a message saying the analysis errored is sent instead.
+  *  `push_plotting()`: this was written mainly to save me typing the same `pushoverr` command over and over
 
 
 <br>

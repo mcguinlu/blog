@@ -1,5 +1,5 @@
 ---
-title: Searching medRxiv and bioRxiv Preprint Data
+title: "Searching medRxiv and bioRxiv Preprint Data"
 author: Luke McGuinness
 date: '2020-10-20'
 slug: searching-medrxivr-and-biorxiv-preprint-data
@@ -8,7 +8,7 @@ categories:
   - systematic-reviews
   - bibliographic-database
   - evidence-synthesis
-excerpt: The medrxivr package allows users to import and search medRxiv and bioRxiv preprint metadata.
+excerpt: "The medrxivr package allows users to import and search medRxiv and bioRxiv preprint metadata."
 ---
 
 ```{r setup, include=FALSE}

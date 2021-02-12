@@ -20,6 +20,6 @@ source(here::here("R","sidenote.R"))
 Being from a certain region of Ireland, I pronounce the letter R to rhyme with "oar".
 
 
-## Not "argh"!
+## Not "arhh"!
 
 Everyone else sounds like a bunch of pirates to me!

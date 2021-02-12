@@ -1,0 +1,26 @@
+---
+title: R vs R
+author: Luke McGuinness
+date: '2020-01-01'
+slug: r-vs-r
+categories: []
+tags: []
+excerpt: Put excerpt here
+math: no
+meta: yes
+draft: true
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+source(here::here("R","sidenote.R"))
+```
+
+## It's "oar"...
+
+Being from a certain region of Ireland, I pronounce the letter R to rhyme with "oar".
+
+
+## Not "argh"
+
+Everyone else sounds like a bunch of pirates to me!

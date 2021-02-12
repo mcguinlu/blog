@@ -2,6 +2,20 @@ body{
   padding-left: 0;
 }
 
+.hljs-string, .hljs-variable, .hljs-template-variable, .hljs-strong, .hljs-emphasis, .hljs-quote {
+    color: inherit;
+}
+
+
+.hljs-keyword {
+    color: darkred;
+}
+
+.r .hljs-comment {
+    color: chocolate;
+    font-weight: bold;
+}
+
 code {
   background-color: #f7f7f7;
   font-size: 0.95em;

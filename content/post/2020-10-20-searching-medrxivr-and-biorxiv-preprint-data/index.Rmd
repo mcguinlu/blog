@@ -77,18 +77,18 @@ mx_data %>%
   scale_x_continuous(expand = c(0, 0), limits = c(0,10)) +
   theme_classic() 
 ```
-
+<!--html_preserve-->
 {{< figure src = "categories-1.png" width = "600" alt = "Distribution of preprints posted to medRxiv in the first week of 2020 across topic categories." >}}
+<!--/html_preserve-->
 
 ### Use case #2 – Reproducible searching and exporting
 
 While being able to easily import medRxiv data is useful, as a systematic reviewer, my main interest is in what medrxivr allows you to do once you have imported a local copy of the database. As mentioned in the section above, the native medRxiv website search interface is neither reproducible nor transparent, and while the API (accessed via `mx_api_content()`) is great for accessing medRxiv metadata, it does not offer any search functionality. The second core aspect of medrxivr's functionality is designed to address these limitations, allowing information specialists to build complex searches and apply them to a local copy of the medRxiv database, all while documenting their search strategy in a transparent manner. An example is given below, where a researcher is looking for records that contain both dementia-related and lipid-related terms:
 
+`r tufte::margin_note("The \"preprint_data\" object could be saved as a CSV in your project repository to aid reproducibility.")`
 ``` {r, R.options=list(width=100), class.output="fullwidth-output", message = FALSE}
 
 # Use the maintained snapshot to quickly load today's copy of the medRxiv database
-# Note - this `preprint_data` object could be saved as a CSV in your project 
-#        repository to aid reproducibility
 preprint_data <- mx_snapshot()
 
 # Build your search

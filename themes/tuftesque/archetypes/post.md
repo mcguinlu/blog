@@ -1,7 +1,6 @@
 +++
 math = false 
 meta = true
-toc = false
 author = "AUTHOR NAME"
 excerpt = "Put excerpt here"
 draft = true

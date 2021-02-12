@@ -2,7 +2,7 @@ baseurl = "/"
 languageCode = "en-us"
 title = "Note To Self"
 theme = "tuftesque"
-googleAnalytics = ""
+googleAnalytics = "G-YKRC772GWB"
 disqusShortname = ""
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_cache$", "\\.knit\\.md$", "\\.utf8\\.md$"]
 

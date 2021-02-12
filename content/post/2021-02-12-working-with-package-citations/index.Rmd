@@ -1,0 +1,17 @@
+---
+title: Working with package citations
+author: Luke McGuinness
+date: '2021-02-12'
+slug: working-with-package-citations
+categories:
+  - R
+tags: []
+excerpt: Put excerpt here
+math: no
+meta: yes
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+source(here::here("R","sidenote.R"))
+```

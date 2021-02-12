@@ -607,7 +607,7 @@ label.margin-toggle:not(.sidenote-number) { display: none; }
     width: 90% !important;
     padding: 0 !important;
   }
-  .marginnote {
+  .marginnote, .sidenote {
     display: block;
     float: left;
     left: 1rem;

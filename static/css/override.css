@@ -410,7 +410,7 @@ img {
   max-width: 100%; 
 }
 
-.footnote .sidenote, .marginnote { 
+.footnote, .sidenote, .marginnote { 
   float: right;
   clear: right;
   margin-right: -60%;
@@ -442,26 +442,24 @@ img {
   content: counter(sidenote-counter) " ";
   font-family: et-book-roman-old-style;
   position: relative;
-  vertical-align: baseline; 
+  vertical-align: baseline;
 }
 
 .sidenote-number:after { 
   content: counter(sidenote-counter);
   font-size: 1rem;
   top: -0.5rem;
-  left: 0.1rem; 
 }
 
 .sidenote:before { 
   content: counter(sidenote-counter) " ";
   top: -0.5rem; 
+  font-size: 1rem;
 }
 
 p, footer, table, div.table-wrapper-small, div.supertable-wrapper > p, div.booktabs-wrapper { 
   width: 55%; 
 }
-
-
 
 div.fullwidth, table.fullwidth { 
   width: 100%; 
@@ -642,4 +640,8 @@ label.margin-toggle:not(.sidenote-number) { display: none; }
   transform: translate(-50%, -50%);
   box-shadow: 0 0 6px 50vw #000000de;
   cursor: zoom-out !important;
+}
+
+.list-page ul li {
+  font-size:14px;
 }

@@ -15,15 +15,14 @@ excerpt: "The medrxivr package allows users to import and search medRxiv and bio
 library(medrxivr)
 library(dplyr)
 library(ggplot2)
-sn <- 0
-# <sup>`r (sn <- sn+1)`</sup> `r tufte::margin_note(paste0("<sup>",sn,"</sup>"))`
+source(here::here("R","sidenote.R"))
 ```
 
 *Note: cross-posted with [the rOpenSci blog](https://ropensci.org/blog/2020/10/20/searching-medrxivr-and-biorxiv-preprint-data/).*
 
 ## Background and motivation
 
-[medRxiv](https://www.medrxiv.org/), as the preprint repository for papers in the medical, clinical, and related health sciences,<sup>`r (sn <- sn+1)`</sup> `r tufte::margin_note(paste0("<sup>",sn,"</sup>Rawlinson, C., & Bloom, T. (2019). New preprint server for medical research. BMJ, 365. <https://doi.org/doi:10.1136/bmj.l2301>"))` has become a central source of new studies related to the COVID-19 pandemic. As a result, more and more researchers have begun to include medRxiv in the list of bibliographic databases they search as part of systematic reviews, a type of study that aims to find and bring together all available evidence on a topic in order to provide a comprehensive answer to a research question.
+[medRxiv](https://www.medrxiv.org/), as the preprint repository for papers in the medical, clinical, and related health sciences,`r sidenote("Rawlinson, C., & Bloom, T. (2019). New preprint server for medical research. BMJ, 365. <https://doi.org/doi:10.1136/bmj.l2301>")` has become a central source of new studies related to the COVID-19 pandemic. As a result, more and more researchers have begun to include medRxiv in the list of bibliographic databases they search as part of systematic reviews, a type of study that aims to find and bring together all available evidence on a topic in order to provide a comprehensive answer to a research question.
 
 However, the native search functionality available on the medRxiv website is not suitable for use in systematic reviews due to a number of limitations. This prompted the development of [medrxivr](https://docs.ropensci.org/medrxivr), an R package which provides access to, and tools for searching, medRxiv and bioRxiv preprint metadata. This post will detail the limitations of the native medRxiv search and summarize the key functionality of medrxivr via two key use cases. Note that while medrxivr allows users to access and search medrxiv and bioRxiv preprint metadata as both repositories are run by the Cold Spring Harbor Laboratory and so have a similar API endpoint/native website search functionality, all illustrating examples in this post are taken from medRxiv.
 
@@ -79,9 +78,7 @@ mx_data %>%
   theme_classic() 
 ```
 
-<!--html_preserve-->
 {{< figure src = "categories-1.png" width = "600" alt = "Distribution of preprints posted to medRxiv in the first week of 2020 across topic categories." >}}
-<!--/html_preserve-->
 
 ### Use case #2 – Reproducible searching and exporting
 

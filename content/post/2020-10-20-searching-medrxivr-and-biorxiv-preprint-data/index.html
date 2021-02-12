@@ -18,7 +18,7 @@ excerpt: "The medrxivr package allows users to import and search medRxiv and bio
 <p><em>Note: cross-posted with <a href="https://ropensci.org/blog/2020/10/20/searching-medrxivr-and-biorxiv-preprint-data/">the rOpenSci blog</a>.</em></p>
 <div id="background-and-motivation" class="section level2">
 <h2>Background and motivation</h2>
-<p><a href="https://www.medrxiv.org/">medRxiv</a>, as the preprint repository for papers in the medical, clinical, and related health sciences,<sup>1</sup> <label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote"><sup>1</sup>Rawlinson, C., &amp; Bloom, T. (2019). New preprint server for medical research. BMJ, 365. <a href="https://doi.org/doi:10.1136/bmj.l2301" class="uri">https://doi.org/doi:10.1136/bmj.l2301</a></span> has become a central source of new studies related to the COVID-19 pandemic. As a result, more and more researchers have begun to include medRxiv in the list of bibliographic databases they search as part of systematic reviews, a type of study that aims to find and bring together all available evidence on a topic in order to provide a comprehensive answer to a research question.</p>
+<p><a href="https://www.medrxiv.org/">medRxiv</a>, as the preprint repository for papers in the medical, clinical, and related health sciences,<span class="sidenote-number"></span><span class="sidenote">Rawlinson, C., &amp; Bloom, T. (2019). New preprint server for medical research. BMJ, 365. <a href="https://doi.org/doi:10.1136/bmj.l2301" class="uri">https://doi.org/doi:10.1136/bmj.l2301</a></span> has become a central source of new studies related to the COVID-19 pandemic. As a result, more and more researchers have begun to include medRxiv in the list of bibliographic databases they search as part of systematic reviews, a type of study that aims to find and bring together all available evidence on a topic in order to provide a comprehensive answer to a research question.</p>
 <p>However, the native search functionality available on the medRxiv website is not suitable for use in systematic reviews due to a number of limitations. This prompted the development of <a href="https://docs.ropensci.org/medrxivr">medrxivr</a>, an R package which provides access to, and tools for searching, medRxiv and bioRxiv preprint metadata. This post will detail the limitations of the native medRxiv search and summarize the key functionality of medrxivr via two key use cases. Note that while medrxivr allows users to access and search medrxiv and bioRxiv preprint metadata as both repositories are run by the Cold Spring Harbor Laboratory and so have a similar API endpoint/native website search functionality, all illustrating examples in this post are taken from medRxiv.</p>
 <hr>
 </div>
@@ -65,9 +65,7 @@ mx_data %&gt;%
   xlab(&quot;Number of preprints, 1st week of January 2020&quot;) +
   scale_x_continuous(expand = c(0, 0), limits = c(0,10)) +
   theme_classic() </code></pre>
-
-{{< figure src = "categories-1.png" width = "600" alt = "Distribution of preprints posted to medRxiv in the first week of 2020 across topic categories." >}}
-
+<p>{{&lt; figure src = “categories-1.png” width = “600” alt = “Distribution of preprints posted to medRxiv in the first week of 2020 across topic categories.” &gt;}}</p>
 </div>
 <div id="use-case-2-reproducible-searching-and-exporting" class="section level3">
 <h3>Use case #2 – Reproducible searching and exporting</h3>
@@ -88,20 +86,20 @@ results &lt;- mx_search(data = preprint_data,
 
 # Let&#39;s have a look at the returned records
 results</code></pre>
-<pre class="fullwidth-output"><code>## # A tibble: 72 x 14
+<pre class="fullwidth-output"><code>## # A tibble: 73 x 14
 ##       ID title abstract authors date       category doi   version author_correspo~ author_correspo~
 ##    &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;   &lt;date&gt;     &lt;chr&gt;    &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;           
-##  1   181 Exce~ &quot;Object~ De Lim~ 2019-07-25 Cardiov~ 10.1~       1 Andrei C Sposito &quot;Laboratory of ~
-##  2   278 Peri~ &quot;Introd~ Newton~ 2019-08-14 Addicti~ 10.1~       1 Dwight F Newton  &quot;University of ~
-##  3   281 A co~ &quot;Object~ Moriar~ 2019-08-15 Cardiov~ 10.1~       1 Mark H Ebell     &quot;University of ~
-##  4   338 Apol~ &quot;Backgr~ Richar~ 2019-08-29 Cardiov~ 10.1~       1 Tom G Richardson &quot;University of ~
-##  5   304 Comp~ &quot;Owing ~ Batty,~ 2019-08-17 Epidemi~ 10.1~       1 George David Ba~ &quot;University Col~
-##  6   470 Self~ &quot;Backgr~ Grover~ 2019-09-23 Cardiov~ 10.1~       1 Abhinav Grover   &quot;University of ~
-##  7   641 Tren~ &quot;Object~ Curtis~ 2019-10-18 Cardiov~ 10.1~       1 Ben Goldacre     &quot;University of ~
+##  1   184 Exce~ &quot;Object~ De Lim~ 2019-07-25 Cardiov~ 10.1~       1 Andrei C Sposito &quot;Laboratory of ~
+##  2   281 Peri~ &quot;Introd~ Newton~ 2019-08-14 Addicti~ 10.1~       1 Dwight F Newton  &quot;University of ~
+##  3   284 A co~ &quot;Object~ Moriar~ 2019-08-15 Cardiov~ 10.1~       1 Mark H Ebell     &quot;University of ~
+##  4   341 Apol~ &quot;Backgr~ Richar~ 2019-08-29 Cardiov~ 10.1~       1 Tom G Richardson &quot;University of ~
+##  5   307 Comp~ &quot;Owing ~ Batty,~ 2019-08-17 Epidemi~ 10.1~       1 George David Ba~ &quot;University Col~
+##  6   473 Self~ &quot;Backgr~ Grover~ 2019-09-23 Cardiov~ 10.1~       1 Abhinav Grover   &quot;University of ~
+##  7   645 Tren~ &quot;Object~ Curtis~ 2019-10-18 Cardiov~ 10.1~       1 Ben Goldacre     &quot;University of ~
 ##  8   981 Does~ &quot;OBJECT~ Harber~ 2019-11-29 Endocri~ 10.1~       1 Lisa Harber-Asc~ &quot;King\\&#39;s Colle~
 ##  9  1089 Asse~ &quot;Backgr~ Finner~ 2019-12-14 Cardiov~ 10.1~       1 Pradeep Nataraj~ &quot;Massachusetts ~
-## 10  1341 Idea~ &quot;BACKGR~ Mckenz~ 2020-01-16 Epidemi~ 10.1~       1 Trevor S Fergus~ &quot;Caribbean Inst~
-## # ... with 62 more rows, and 4 more variables: link_page &lt;chr&gt;, link_pdf &lt;chr&gt;, license &lt;chr&gt;,
+## 10  1342 Idea~ &quot;BACKGR~ Mckenz~ 2020-01-16 Epidemi~ 10.1~       1 Trevor S Fergus~ &quot;Caribbean Inst~
+## # ... with 63 more rows, and 4 more variables: link_page &lt;chr&gt;, link_pdf &lt;chr&gt;, license &lt;chr&gt;,
 ## #   published &lt;chr&gt;</code></pre>
 <p>Once you have run your search, exporting the results to a .BIB file for import into a reference manager, such as Zotero or Mendeley, is as simple as passing the results object to the <code>mx_export()</code> function.</p>
 <p>Similarly, as screening the full text PDFs of records returned by a search against eligibility criteria forms a key part of a systematic review, a second helper function downloads the PDF for each record returned by <code>mx_search()</code>. Again, it is simply a case of passing the <code>results</code> object to the <code>mx_download()</code> function.</p>

@@ -15,10 +15,9 @@ knitr::opts_chunk$set(eval = FALSE)
 source(here::here("R","sidenote.R"))
 ```
 
-I recently took over a project that made use of Stata to perform the analysis and subsequently used R`r sidenote("Pronounced \"oar\"")` to create plots of the results. 
+I recently took over a project that made use of Stata to perform the analysis and subsequently used R`r sidenote("R")` to create plots of the results.
 
 Inspired by this [blogpost](https://fsolt.org/blog/2018/08/15/switch-to-r.html) from Frederick Solt, I wanted to see if I could set up my project to run start-to-finish from a single script (i.e. could I call Stata efficiently from R to perform the analysis, and then immediately use R to plot the results?) and have R notify me when it was complete.
-
 
 __TL;DR - This is entirely possible and makes running long Stata scripts much easier (& more fun?).__
 

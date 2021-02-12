@@ -1,14 +1,13 @@
 ---
 title: R vs R
 author: Luke McGuinness
-date: '2020-01-01'
+date: '2019-01-01'
 slug: r-vs-r
-categories: []
+categories: [R]
 tags: []
-excerpt: Put excerpt here
+excerpt: On the pronunciation of the letter R.
 math: no
 meta: yes
-draft: true
 ---
 
 ```{r, include=FALSE}
@@ -21,6 +20,6 @@ source(here::here("R","sidenote.R"))
 Being from a certain region of Ireland, I pronounce the letter R to rhyme with "oar".
 
 
-## Not "argh"
+## Not "argh"!
 
 Everyone else sounds like a bunch of pirates to me!

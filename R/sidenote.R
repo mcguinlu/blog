@@ -1,8 +1,20 @@
-sidenote <- function(text){
+sidenote <- function(text) {
+  if (text == "R") {
+    return(
+      paste0(
+        "<span class=\"sidenote-number\"></span><span class=\"sidenote\">",
+        "Pronounced <a href = \"/2019/01/01/r-vs-r/\">\"oar\"</a>.</span>"
+      )
+    )
+  } else {
+    return(
+      paste0(
+        "<span class=\"sidenote-number\"></span><span class=\"sidenote\">",
+        text,
+        "</span>"
+      )
+    )
+  }
   
-  paste0("<span class=\"sidenote-number\"></span><span class=\"sidenote\">",
-  text,
-  "</span>")
-
 }
   

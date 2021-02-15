@@ -1,0 +1,41 @@
+---
+title: Building this blog
+author: Luke McGuinness
+date: '2021-02-15'
+slug: building-this-blog
+categories:
+  - css
+  - html
+  - R
+tags: []
+excerpt: Put excerpt here
+math: no
+meta: yes
+draft: true
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+source(here::here("R","sidenote.R"))
+```
+
+To being with, an admission - I really *really* love side-notes. The idea of having the relevant information right there, without the user having to jump up and down from footnotes makes so much sense to me. 
+
+For this reason, I was keen that my blog had 
+
+FOrtunately, a lot of the heavy lifting had been don
+
+## The `tuftesque` theme
+
+
+
+* Built by Nick Strayer
+
+* Really awesome
+
+* See his introduction to the 
+
+## Adding support for sidenotes
+
+
+## 

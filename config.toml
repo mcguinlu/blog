@@ -1,4 +1,4 @@
-baseurl = "/"
+baseurl = "https://mcguinlu.netlify.app/"
 languageCode = "en-us"
 title = "Note To Self"
 theme = "tuftesque"

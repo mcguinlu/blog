@@ -17,8 +17,41 @@ draft: true
 
 <div id="the-problem" class="section level2">
 <h2>The problem</h2>
-<p>File paths using <code>here</code></p>
+<p>File paths using <code>here()</code> or <code>file.path()</code> should be</p>
+<p>However, this really doesn’t play well with RStudio’s auto-complete functionality, meaning that I either have to manually.</p>
+<pre class="r"><code>library(here)
+
+here::here(&quot;data/2020/06/01/data.csv&quot;)
+
+# becomes
+
+here::here(&quot;data&quot;,&quot;2020&quot;,&quot;06&quot;,&quot;01&quot;,&quot;data.csv&quot;)</code></pre>
 </div>
 <div id="the-solution" class="section level2">
 <h2>The solution</h2>
+<p>First issue was creating the functions to identify and then reformat the]</p>
+<div id="release-the-regex" class="section level3">
+<h3>RELEASE THE REGEX!!</h3>
+<p>The hardest part of the project (but by far the most satisfying when it <em>finally</em> worked) was created the regular expression syntax to match and replace the slashes.</p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote">See <a href="https://xkcd.com/1638/" class="uri">https://xkcd.com/1638/</a></span>The worst by far was the backslash, where you need four backslashes to match a single literal one:</p>
+<p>Apply the function to each match, to create the text to replace it with.</p>
+</div>
+<div id="implementing-the-addin" class="section level3">
+<h3>Implementing the addin</h3>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote">See the fantastic <a href="https://rstudio.github.io/rstudioaddins/">RStudio tutorial</a> on add-ins.</span>Once you have your function (<code>format_path()</code>) ready to go, it’s a case of creating a <code>inst/rstudio/addins.dcf</code> file in your package to “bind” it to an RStudio add-in. I’ve reproduced the contents of the <code>pathformatr</code> <code>addins.dsf</code> file below:</p>
+<pre><code>Name: Split file path into quoted and comma-separated elements.
+Description: Splits file paths in here() and file.path() calls into individual quoted and comma-separated segments, allowing users to autocomplete their paths using the RStudio file completion functionality and then quickly reformat to be serperator-agnostic.
+Binding: format_path
+Interactive: false</code></pre>
+</div>
+<div id="taking-it-a-step-further" class="section level3">
+<h3>Taking it a step further</h3>
+<p>Having implemented the functionality for a single highlighted file path, I wondered if I could use the same functions to reformat all <code>here()</code> or <code>file.path()</code> calls within the active document.</p>
+<p>An initial issue with <code>format_all_paths()</code> was that after running it, the cursor moves to the end of the active document. To combat this, the function grabs the line the cursor is on when the function is called and returns it to the start of this line once it is finished.</p>
+</div>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>Being completely honest, this saves me approximately 5 seconds each time I use it, so it’s not going to revolutionise my workflow, but it was an excuse to play around with the play around with the <code>rstudioapi</code> package.</p>
+<p>However, hitting a keyboard short to implement an add-in that you wrote is a great feeling!</p>
 </div>

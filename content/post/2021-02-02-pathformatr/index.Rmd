@@ -11,8 +11,65 @@ meta: yes
 draft: true
 ---
 
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+source(here::here("R","sidenote.R"))
+```
+
 ## The problem 
 
-File paths using `here`
+File paths using `here()` or `file.path()` should be 
+
+However, this really doesn't play well with RStudio's auto-complete functionality, meaning that I either have to manually. 
+
+```{r}
+library(here)
+
+here::here("data/2020/06/01/data.csv")
+
+# becomes
+
+here::here("data","2020","06","01","data.csv")
+
+```
 
 ## The solution
+
+First issue was creating the functions to identify and then reformat the]
+
+
+### RELEASE THE REGEX!!
+
+The hardest part of the project (but by far the most satisfying when it *finally* worked) was created the regular expression syntax to match and replace the slashes.
+
+`r tufte::margin_note("See https://xkcd.com/1638/")`The worst by far was the backslash, where you need four backslashes to match a single literal one:
+
+Apply the function to each match, to create the text to replace it with.
+
+
+
+
+### Implementing the addin
+
+`r tufte::margin_note("See the fantastic [RStudio tutorial](https://rstudio.github.io/rstudioaddins/) on add-ins.")`Once you have your function (`format_path()`) ready to go, it's a case of creating a `inst/rstudio/addins.dcf` file in your package to "bind" it to an RStudio add-in. I've reproduced the contents of the `pathformatr` `addins.dsf` file below:
+
+
+``` {}
+Name: Split file path into quoted and comma-separated elements.
+Description: Splits file paths in here() and file.path() calls into individual quoted and comma-separated segments, allowing users to autocomplete their paths using the RStudio file completion functionality and then quickly reformat to be serperator-agnostic.
+Binding: format_path
+Interactive: false
+```
+
+
+### Taking it a step further
+
+Having implemented the functionality for a single highlighted file path, I wondered if I could use the same functions to reformat all `here()` or `file.path()` calls within the active document. 
+
+An initial issue with `format_all_paths()` was that after running it, the cursor moves to the end of the active document. To combat this, the function grabs the line the cursor is on when the function is called and returns it to the start of this line once it is finished.
+
+## Summary
+
+Being completely honest, this saves me approximately 5 seconds each time I use it, so it's not going to revolutionise my workflow, but it was an excuse to play around with the play around with the `rstudioapi` package.
+
+However, hitting a keyboard short to implement an add-in that you wrote is a great feeling!

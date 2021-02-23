@@ -10,8 +10,8 @@
   }
 </style>
 <div id="homepage">
-{{ partial "brand.html" . }}
-<!---{{ partial "banner.html" . }}-->
+{{ partial "brand-homepage.html" . }}
+{{ partial "banner.html" . }}
 {{ range .Site.Pages }}
   {{if eq .Type "post" }}
     {{if eq .Title "Posts"}}

@@ -1,13 +1,7 @@
-<header id = "custom-header">
-  <div id = "header_viz"></div>
-  <link rel="stylesheet" href="{{ "/css/banner.css" | absURL }}">
-</header>
-
-<script>
-    
-  var width   = $("#custom-header").width() ,
-      height  = 200,
-      radius = 20;
+  var width   = $("p").width() ,
+      height  = 200;
+  
+  var radius = 20;
   
   var topology = hexTopology(radius, width, height);
   
@@ -16,9 +10,11 @@
   var path = d3.geo.path()
   .projection(projection);
   
+  
   var svg = d3.select("#header_viz").append("svg")
   .attr("width", width)
   .attr("height", height)
+  .attr("background-color","white")
 
   svg.append("text")
   .attr("x", width/2)
@@ -29,7 +25,66 @@
   .text("Note To Self")
   .style('fill', '#4a4a4a')
   
-  svg.append("g")
+  
+  
+   var svg2 = d3.select("#header_viz2").append("svg")
+  .attr("width", width)
+  .attr("height", height)
+
+  svg2.append("text")
+  .attr("x", width/2)
+  .attr("y", height/2)
+  .attr("class", "banner-text")
+  .attr('text-anchor', "middle")
+  .attr("alignment-baseline","central")
+  .text("Note To Self")
+  .style('fill', '#4a4a4a')
+  
+  svg2.append("g")
+  .attr("class", "hexagon")
+  .selectAll("path")
+  .data(topology.objects.hexagons.geometries)
+  .enter().append("path")
+  .attr("d", function(d) { return path(topojson.feature(topology, d)); })
+  .attr("class", function(d) { return d.fill ? "nofill" : "fill"; })
+
+
+   var svg3 = d3.select("#header_viz3").append("svg")
+  .attr("width", width)
+  .attr("height", height)
+
+  svg3.append("text")
+  .attr("x", width/2)
+  .attr("y", height/2)
+  .attr("class", "banner-text")
+  .attr('text-anchor', "middle")
+  .attr("alignment-baseline","central")
+  .text("Note To Self")
+  .style('fill', '#4a4a4a')
+  
+  svg3.append("g")
+  .attr("class", "hexagon")
+  .selectAll("path")
+  .data(topology.objects.hexagons.geometries)
+  .enter().append("path")
+  .attr("d", function(d) { return path(topojson.feature(topology, d)); })
+  .attr("class", function(d) { return d.fill ? "nofill" : "fill"; })
+  
+
+   var svg4 = d3.select("#header_viz4").append("svg")
+  .attr("width", width)
+  .attr("height", height)
+
+  svg4.append("text")
+  .attr("x", width/2)
+  .attr("y", height/2)
+  .attr("class", "banner-text")
+  .attr('text-anchor', "middle")
+  .attr("alignment-baseline","central")
+  .text("Note To Self")
+  .style('fill', '#4a4a4a')
+  
+  svg4.append("g")
   .attr("class", "hexagon")
   .selectAll("path")
   .data(topology.objects.hexagons.geometries)
@@ -45,7 +100,7 @@
   .on("mousedown", mousedown)
   .on("mousemove", mousemove)
   .on("mouseup", mouseup)
-  
+
 
   var mousing = 0;
   
@@ -115,4 +170,3 @@
       }
     };
   }
-</script>

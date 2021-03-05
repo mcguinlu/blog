@@ -1,0 +1,357 @@
+---
+title: Building the NTS banner
+author: Luke McGuinness
+date: '2021-02-24'
+slug: building-the-nts-banner
+categories:
+  - d3
+  - html
+  - css
+  - javascript
+tags: []
+excerpt: A walkthough of how I created the NTS banner using D3.js
+math: no
+meta: yes
+---
+
+<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="index_files/anchor-sections/anchor-sections.js"></script>
+
+
+
+<link rel="stylesheet" href="d3.css" />
+
+<p>A key part of any new blog is customising your landing page. Inspired by the amazing Live Free or Dichotomize blog,<span class="sidenote-number"></span><span class="sidenote"><a href="https://livefreeordichotomize.com/" class="uri">https://livefreeordichotomize.com/</a></span> maintained by Nick Strayer and Lucy D’Agostino McGowan, I was excited to create my own banner image for NTS.</p>
+<p>I had two main criteria for the new banner, in that I wanted it to be:</p>
+<ul>
+<li>interactive; and<br />
+</li>
+<li>unique to each visitor.</li>
+</ul>
+<p>In terms of a framework for building the banner, as I had been keen to try and use D3 for a while, this seemed like a good project to do so! As a brief overview, D3, short for Data-Driven Documents, is a JavaScript library for creating compelling data visualisations using HTML, SVG, and CSS. It also provides powerful interaction techniques.</p>
+<p>As I had already been using a grey hexagon as the blog’s logo and favicon,<span class="sidenote-number"></span><span class="sidenote">Imaginative, I know. . .</span> I wanted the banner to be in keeping with this theme. Fortunately, I found a wonderful tutorial on creating a hexagon mesh grid in D3,<span class="sidenote-number"></span><span class="sidenote"><a href="https://bl.ocks.org/mbostock/5249328" class="uri">https://bl.ocks.org/mbostock/5249328</a></span> which I was able to adapt and expand to create my banner.</p>
+<div id="getting-started" class="section level2">
+<h2>Getting started</h2>
+<p>To kick things off, I needed to import the <code>D3.js</code> library. I also needed the <code>topojson.js</code> library to help create the hexagons and the <code>jquery.js</code> to allow me to access the calculated widths</p>
+<pre class="html"><code>&lt;script src=&quot;https://d3js.org/d3.v3.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://d3js.org/topojson.v1.min.js&quot;&gt;&lt;/script&gt;
+&lt;script
+  src=&quot;https://code.jquery.com/jquery-3.2.1.min.js&quot;
+  integrity=&quot;sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=&quot;
+  crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>Next, I created a division with the ID “header-viz”:</p>
+<pre class="html"><code>&lt;div id = &quot;header_viz&quot;&gt;&lt;/div&gt;</code></pre>
+<p>In the D3 code below, I access the calculated width of the “p” (paragraph) element on the homepage using <code>$("p").width()</code>, which draws on the jQuery library, so that (a) the banner is the same width as the text on the landing page (~55%), and (b) the image is correctly sized to fit whatever screen it is on.</p>
+<p>Having allowed the width to be calculated automatically, I set the height to be fixed at 200, after playing around with some different options and finding this to be the one that looked best.</p>
+<p>Using D3, I then selected the “header-viz” division I had created above, added (or more accurately, <code>append</code>-ed) an SVG element, and then assigned the calculated width and hard-coded height as attributes using the format <code>.attr("ATTRIBUTE","VALUE")</code>:</p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote">All D3 code either needs to be wraped in a “script” element, or placed in a seperate "*.js" file and read into the HTML document.</span></p>
+<pre class="js"><code>var width   = $(&quot;p&quot;).width(),
+    height  = 200;
+
+var svg = d3.select(&quot;#header_viz&quot;).append(&quot;svg&quot;)
+.attr(&quot;width&quot;, width)
+.attr(&quot;height&quot;, height)</code></pre>
+<p>Now that I had an empty SVG image, it was time to add the title of the blog. The advantage of creating the height and width as variables, rather than directly assigning them using <code>.attr("height", 200)</code> for example, becomes clear here as it allows these values to be reused to correctly position the text in the centre of the image. The <code>text-anchor="middle"</code> and <code>alignment-baseline="central"</code> attributes are used to center the text around the centre-point coordinates (by default, text is aligned to start at the coordinates provided):</p>
+<pre class="js"><code>svg.append(&quot;text&quot;)
+.attr(&quot;x&quot;, width / 2)
+.attr(&quot;y&quot;, height / 2)
+.attr(&quot;class&quot;, &quot;banner-text&quot;)
+.attr(&#39;text-anchor&#39;, &quot;middle&quot;)
+.attr(&quot;alignment-baseline&quot;, &quot;central&quot;)
+.text(&quot;Note To Self&quot;)
+.style(&#39;fill&#39;, &#39;#4a4a4a&#39;)</code></pre>
+<p>The resulting image looked like this:</p>
+
+
+<div id = "header_viz"></div>
+
+
+</div>
+<div id="add-the-hexagons" class="section level2">
+<h2>Add the hexagons</h2>
+<p>Having defined the title, it was time to add the hexagons. This element drew heavily on the D3 tutorial mentioned in the introduction. I haven’t reproduced all the relevant code here, as there is quite a lot. If you are interested, you can see the how the data (<code>topology.objects.hexagons.geometries</code>) and functions (e.g. <code>topojson.feature</code>) used in this block are defined in the file included at the end of this post.</p>
+<pre class="js"><code>svg.append(&quot;g&quot;)
+.attr(&quot;class&quot;, &quot;hexagon&quot;)
+.selectAll(&quot;path&quot;)
+.data(topology.objects.hexagons.geometries)
+.enter().append(&quot;path&quot;)
+.attr(&quot;d&quot;, function(d) {
+  return path(topojson.feature(topology, d))
+  
+})
+.attr(&quot;class&quot;, function(d) {
+  return d.fill ? &quot;nofill&quot;:&quot;fill&quot;
+  
+})</code></pre>
+<p>The important thing to note here is that the “class” of each hexagon is being defined by a function that quasi-randomly assigns a value of either “fill” or “nofill”, so that every time a user visits or refreshes the page, they should see a different starting configuration of filled hexagons. I say quasi-randomly, because the function produces a random number for each hexagon, and if the number is lower than some threshold, it assigns a class of “fill”. I defined the threshold to decrease dramatically as you move left-to-right across the hexagon grid in order to create the cluster of filled hexagons on the left-hand side of the image.</p>
+<p>In the corresponding CSS, I defined fill colours for the hexagons. The default colour for hexagons with a class of “nofill” was transparent, allowing the background colour to show through. This was necessary as otherwise the “Note to Self” text would not be visible. Alternatively, if the hexagon had a class of “fill”, it was coloured a darker grey:</p>
+<pre class="css"><code>.hexagon {
+  fill: transparent;
+  pointer - events:all;
+}
+
+.hexagon .fill {
+  fill:#4A4A4A;
+}</code></pre>
+<p>So now the image looked like:</p>
+
+
+<div id = "header_viz2"></div>
+
+
+<p><br></p>
+</div>
+<div id="adding-reactvity" class="section level2">
+<h2>Adding reactvity</h2>
+<div id="on-hover" class="section level3">
+<h3>On hover</h3>
+<p>In terms of interactivity, the first thing I implemented was for any transparent hexagon to fill on hover - I wanted it to be very obvious when a visitor moved their mouse over the banner that it was interactive. While I could have done this with D3 using <code>.on("mouseover",FUN)</code>, a simpler solution was to add a <code>:hover</code> selector to the <code>.hexagon .nofill</code> class in the CSS file:</p>
+<pre class="css"><code>.hexagon .nofill:hover {
+  fill: #4A4A4A;
+}</code></pre>
+<p>Now, any transparent hexagon will temporarily fill as long as the cursor is hovering over it.</p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote">Hover over a hexagon to see the interactivity.</span>
+
+
+<div id = "header_viz3"></div>
+
+</p>
+<p><br></p>
+</div>
+<div id="permanent-interactivity" class="section level3">
+<h3>Permanent interactivity</h3>
+<p>The final thing I wanted to do was to allow visitors to permanently fill in a hexagon by clicking on it.</p>
+<p>This involved creating some functions to respond to mouse events, which changed the class of a hexagon from “nofill” to “fill” on click:</p>
+<pre class="js"><code>svg.append(&quot;g&quot;)
+  .attr(&quot;class&quot;, &quot;hexagon&quot;)
+  .selectAll(&quot;path&quot;)
+  .data(topology.objects.hexagons.geometries)
+  .enter().append(&quot;path&quot;)
+.attr(&quot;d&quot;, function(d) {
+  return path(topojson.feature(topology, d))
+  
+})
+.attr(&quot;class&quot;, function(d) {
+  return d.fill ? &quot;nofill&quot;:&quot;fill&quot;
+  
+})
+  .on(&quot;mousedown&quot;, mousedown)
+  .on(&quot;mousemove&quot;, mousemove)
+  .on(&quot;mouseup&quot;, mouseup)
+
+
+  var mousing = 0;
+  
+  function mousedown(d) {
+    mousing = d.fill ? -1 : +1;
+    mousemove.apply(this, arguments);
+  }
+  
+  function mousemove(d) {
+    if (mousing) {
+      d3.select(this)
+        .attr(&quot;class&quot;, &quot;fill&quot;)
+        .classed(&quot;nofill&quot;, d.fill = mousing &gt; 0);
+        
+    }
+  }
+  
+  function mouseup() {
+    mousemove.apply(this, arguments);
+    mousing = 0;
+  }
+</code></pre>
+<p><br></p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote">Click on a single non-filled hexagon, or click and drag, to fill in the banner.</span>
+
+
+<div id = "header_viz4"></div>
+
+</p>
+<p><br></p>
+
+
+<script src = "d3.js"></script>
+
+
+</div>
+</div>
+<div id="materials" class="section level2">
+<h2>Materials</h2>
+<p>Everything needed to reproduce the banner is included in the hidden code block below. Copy it into a file and save it as HTML, then open with a web browser to view.</p>
+<details>
+<p><summary>banner.html</summary></p>
+<pre class="html"><code>&lt;!DOCTYPE html&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;style&gt;
+
+  .mesh {
+    fill: none;
+    stroke: transparent;
+    stroke-opacity: .2;
+    pointer-events: none;
+  }
+  
+  .border {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 2px;
+    pointer-events: none;
+  }
+  
+  .banner-text {
+    font-size: 3.2rem;
+    font-weight: 400;
+  }
+
+  .hexagon path {
+    -webkit-transition: fill 250ms linear;
+    transition: fill 250ms linear;
+  }
+  
+  .hexagon {
+      fill: transparent;
+      pointer-events: all;
+  }
+  
+  .hexagon .fill {
+    fill: #4A4A4A;
+  }
+  
+
+  .hexagon .nofill:hover {
+    fill: #4A4A4A;
+  }
+  
+
+&lt;/style&gt;
+    
+&lt;p&gt;&lt;/p&gt;
+&lt;div id = &quot;header_viz&quot;&gt;&lt;/div&gt;
+
+&lt;script src=&quot;https://d3js.org/d3.v3.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://d3js.org/topojson.v1.min.js&quot;&gt;&lt;/script&gt;
+&lt;script
+  src=&quot;https://code.jquery.com/jquery-3.2.1.min.js&quot;
+  integrity=&quot;sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=&quot;
+  crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
+
+
+&lt;script&gt;
+
+  var width   = $(&quot;p&quot;).width(),
+      height  = 200;
+  
+  var radius = 20;
+  
+  var topology = hexTopology(radius, width, height);
+  
+  var projection = hexProjection(radius);
+  
+  var path = d3.geo.path()
+  .projection(projection);
+  
+  var svg = d3.select(&quot;#header_viz&quot;).append(&quot;svg&quot;)
+  .attr(&quot;width&quot;, width)
+  .attr(&quot;height&quot;, height)
+
+  svg.append(&quot;text&quot;)
+  .attr(&quot;x&quot;, width/2)
+  .attr(&quot;y&quot;, height/2)
+  .attr(&quot;class&quot;, &quot;banner-text&quot;)
+  .attr(&#39;text-anchor&#39;, &quot;middle&quot;)
+  .attr(&quot;alignment-baseline&quot;,&quot;central&quot;)
+  .text(&quot;Note To Self&quot;)
+  .style(&#39;fill&#39;, &#39;#4a4a4a&#39;)
+  
+  svg.append(&quot;g&quot;)
+  .attr(&quot;class&quot;, &quot;hexagon&quot;)
+  .selectAll(&quot;path&quot;)
+  .data(topology.objects.hexagons.geometries)
+  .enter().append(&quot;path&quot;)
+.attr(&quot;d&quot;, function(d) {
+  return path(topojson.feature(topology, d))
+  
+})
+.attr(&quot;class&quot;, function(d) {
+  return d.fill ? &quot;nofill&quot;:&quot;fill&quot;
+  
+})
+  .on(&quot;mousedown&quot;, mousedown)
+  .on(&quot;mousemove&quot;, mousemove)
+  .on(&quot;mouseup&quot;, mouseup)
+
+
+  var mousing = 0;
+  
+  function mousedown(d) {
+    mousing = d.fill ? -1 : +1;
+    mousemove.apply(this, arguments);
+  }
+  
+  function mousemove(d) {
+    if (mousing) {
+      d3.select(this)
+        .attr(&quot;class&quot;, &quot;fill&quot;)
+        .classed(&quot;nofill&quot;, d.fill = mousing &gt; 0);
+    }
+  }
+  
+  function mouseup() {
+    mousemove.apply(this, arguments);
+    mousing = 0;
+  }
+  
+
+  function hexTopology(radius, width, height) {
+    var dx = radius * 2 * Math.sin(Math.PI / 3),
+    dy = radius * 1.5,
+    m = Math.ceil((height + radius) / dy) + 1,
+    n = Math.ceil(width / dx) + 1,
+    geometries = [],
+    arcs = [];
+    
+    for (var j = -1; j &lt;= m; ++j) {
+      for (var i = -1; i &lt;= n; ++i) {
+        var y = j * 2, x = (i + (j &amp; 1) / 2) * 2;
+        arcs.push([[x, y - 1], [1, 1]], [[x + 1, y], [0, 1]], [[x + 1, y + 1], [-1, 1]]);
+      }
+    }
+    
+    for (var j = 0, q = 3; j &lt; m; ++j, q += 6) {
+      for (var i = 0; i &lt; n; ++i, q += 3) {
+        geometries.push({
+          type: &quot;Polygon&quot;,
+          arcs: [[q, q + 1, q + 2, ~(q + (n + 2 - (j &amp; 1)) * 3), ~(q - 2), ~(q - (n + 2 + (j &amp; 1)) * 3 + 2)]],
+          fill: Math.random() &lt; i / n * 4
+        });
+      }
+    }
+    
+    return {
+      transform: {translate: [0, 0], scale: [1, 1]},
+      objects: {hexagons: {type: &quot;GeometryCollection&quot;, geometries: geometries}},
+      arcs: arcs
+    };
+  }
+  
+  function hexProjection(radius) {
+    var dx = radius * 2 * Math.sin(Math.PI / 3),
+    dy = radius * 1.5;
+    return {
+      stream: function(stream) {
+        return {
+          point: function(x, y) { stream.point(x * dx / 2, (y - (2 - (y &amp; 1)) / 3) * dy / 2); },
+          lineStart: function() { stream.lineStart(); },
+          lineEnd: function() { stream.lineEnd(); },
+          polygonStart: function() { stream.polygonStart(); },
+          polygonEnd: function() { stream.polygonEnd(); }
+        };
+      }
+    };
+  }
+  
+&lt;/script&gt;</code></pre>
+</details>
+</div>

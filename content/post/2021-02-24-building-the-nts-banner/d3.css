@@ -1,0 +1,76 @@
+  .mesh {
+    fill: none;
+    stroke: transparent;
+    stroke-opacity: .2;
+    pointer-events: none;
+  }
+  
+  .border {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 2px;
+    pointer-events: none;
+  }
+  
+  .banner-text {
+    font-size: 3.2rem;
+    font-weight: 400;
+  }
+
+  .hexagon path {
+    -webkit-transition: fill 250ms linear;
+    transition: fill 250ms linear;
+  }
+  
+
+  #header_viz2 body {
+    background-color: #eeeeee;
+  }
+  
+  #header_viz2 .hexagon {
+      fill: transparent;
+      pointer-events: all;
+  }
+  
+  #header_viz2 .hexagon .fill {
+    fill: #4A4A4A;
+  }
+  
+
+  #header_viz3 body {
+    background-color: #eeeeee;
+  }
+  
+  #header_viz3 .hexagon {
+      fill: transparent;
+      pointer-events: all;
+  }
+  
+  #header_viz3 .hexagon .fill {
+    fill: #4A4A4A;
+  }
+  
+  #header_viz3 .hexagon .nofill:hover {
+    fill: #4A4A4A;
+  }
+  
+   
+   
+  #header_viz4 body {
+    background-color: #eeeeee;
+  }
+  
+  #header_viz4 .hexagon {
+      fill: transparent;
+  }
+  
+  #header_viz4 .hexagon .fill {
+    fill: #4A4A4A;
+  }
+  
+
+  #header_viz4 .hexagon .nofill:hover {
+    fill: #4A4A4A;
+  }
+  
+  

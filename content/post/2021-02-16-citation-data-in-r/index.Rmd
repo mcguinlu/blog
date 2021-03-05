@@ -1,0 +1,43 @@
+---
+title: Citation data in R
+author: Luke McGuinness
+date: '2021-02-16'
+slug: citation-data-in-r
+categories:
+  - bibliographic-database
+  - R
+tags: []
+excerpt: Put excerpt here
+math: no
+meta: yes
+draft: true
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+source(here::here("R","sidenote.R"))
+```
+
+One of the packages I developed for creating publication quality risk-of-bias plots`r sidenote("[robvis](https://github.com/mcguinlu/robvis)")` has now been used in >100 systematic reviews. The functionality is available as a R`r sidenote("R")` package and as a Shiny web application.
+
+In order to better understand the users of my software, I was keen to send out a short survey to those that had used the tool in a published paper.
+
+## Extracting 
+
+So how many papers have cited the `robvis` paper in Research Synthesis Methods:
+
+
+```{r, class.output="fullwidth-output"}
+library(rcrossref)
+
+doi <- "10.1002/jrsm.1411"
+
+citation_data <- cr_works(doi)
+
+citation_data$data$is.referenced.by.count
+
+```
+
+However, the CrossRef API does not provide anyt 
+
+

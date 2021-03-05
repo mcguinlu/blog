@@ -1,0 +1,36 @@
+  .mesh {
+    fill: none;
+    stroke: transparent;
+    stroke-opacity: .2;
+    pointer-events: none;
+  }
+  
+  .border {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 2px;
+    pointer-events: none;
+  }
+  
+  .banner-text {
+    font-size: 3.2rem;
+    font-weight: 400;
+  }
+
+  .hexagon path {
+    -webkit-transition: fill 250ms linear;
+    transition: fill 250ms linear;
+  }
+  
+  .hexagon {
+      fill: transparent;
+      pointer-events: all;
+  }
+  
+  .hexagon .fill {
+    fill: #4A4A4A;
+  }
+  
+  .hexagon .nofill:hover {
+    fill: #4A4A4A;
+  }

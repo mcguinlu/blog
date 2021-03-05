@@ -2,13 +2,17 @@ body{
   padding-left: 0;
 }
 
-.hljs-string, .hljs-variable, .hljs-template-variable, .hljs-strong, .hljs-emphasis, .hljs-quote {
+.hljs-variable, .hljs-template-variable, .hljs-strong, .hljs-emphasis, .hljs-quote {
     color: inherit;
 }
 
+.hljs-string {
+  color: darkred;
+}
 
 .hljs-keyword {
-    color: darkred;
+    color: black;
+    font-weight: bold;
 }
 
 .r .hljs-comment {
@@ -659,45 +663,3 @@ label.margin-toggle:not(.sidenote-number) { display: none; }
 .list-page ul li {
   font-size:14px;
 }
-
-
-.hexagon {
-      fill: #4A4A4A;
-      pointer-events: all;
-  }
-  
-  body {
-    background-color: #eeeeee;
-  }
-
-  .hexagon path {
-    -webkit-transition: fill 250ms linear;
-    transition: fill 250ms linear;
-  }
-  
-  .hexagon :hover {
-    fill: #3D3D3D;
-  }
-  
-  .hexagon .fill {
-    fill: transparent;
-  }
-  
-  .mesh {
-    fill: none;
-    stroke: transparent;
-    stroke-opacity: .2;
-    pointer-events: none;
-  }
-  
-  .border {
-    fill: none;
-    stroke: transparent;
-    stroke-width: 2px;
-    pointer-events: none;
-  }
-  
-  .banner-text {
-    font-size: 3.2rem;
-    font-weight: 400;
-  }

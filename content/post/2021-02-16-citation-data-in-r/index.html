@@ -1,0 +1,33 @@
+---
+title: Citation data in R
+author: Luke McGuinness
+date: '2021-02-16'
+slug: citation-data-in-r
+categories:
+  - bibliographic-database
+  - R
+tags: []
+excerpt: Put excerpt here
+math: no
+meta: yes
+draft: true
+---
+
+<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="index_files/anchor-sections/anchor-sections.js"></script>
+
+
+<p>One of the packages I developed for creating publication quality risk-of-bias plots<span class="sidenote-number"></span><span class="sidenote"><a href="https://github.com/mcguinlu/robvis">robvis</a></span> has now been used in &gt;100 systematic reviews. The functionality is available as a R<span class="sidenote-number"></span><span class="sidenote">Pronounced <a href = "/2019/01/01/r-vs-r/">“oar”</a>.</span> package and as a Shiny web application.</p>
+<p>In order to better understand the users of my software, I was keen to send out a short survey to those that had used the tool in a published paper.</p>
+<div id="extracting" class="section level2">
+<h2>Extracting</h2>
+<p>So how many papers have cited the <code>robvis</code> paper in Research Synthesis Methods:</p>
+<pre class="r"><code>library(rcrossref)
+
+doi &lt;- &quot;10.1002/jrsm.1411&quot;
+
+citation_data &lt;- cr_works(doi)
+
+citation_data$data$is.referenced.by.count</code></pre>
+<p>However, the CrossRef API does not provide anyt</p>
+</div>

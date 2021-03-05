@@ -37,7 +37,7 @@ As I had already been using a grey hexagon as the blog's logo and favicon,`r sid
 ## Getting started
 
 
-To kick things off, I needed to import the `D3.js` library. I also needed the `topojson.js` library to help create the hexagons and the `jquery.js` to allow me to access the calculated widths 
+To kick things off, I needed to import the `D3.js` library. I also needed the `topojson.js` library to help create the hexagons and the `jquery.js` to allow me to access the calculated widths of html elements:
 
 ```{html}
 <script src="https://d3js.org/d3.v3.min.js"></script>

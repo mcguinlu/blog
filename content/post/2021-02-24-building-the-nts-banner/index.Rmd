@@ -9,7 +9,7 @@ categories:
   - css
   - javascript
 tags: []
-excerpt: A walkthough of how I created the NTS banner using D3.js
+excerpt: A walkthrough of creating the NTS banner using D3.js
 math: no
 meta: yes
 ---

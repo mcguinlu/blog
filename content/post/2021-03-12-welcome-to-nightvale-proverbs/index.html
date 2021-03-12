@@ -1,0 +1,163 @@
+---
+title: Welcome to Night Vale Proverbs
+author: Luke McGuinness
+date: '2021-03-12'
+slug: welcome-to-nightvale-proverbs
+categories:
+  - side-project
+  - R
+tags: []
+excerpt: Put excerpt here
+math: no
+meta: yes
+---
+
+
+
+<p>As part of my “Oh god, what am I going to do during lockdown?!” phase, I got really into the wonderfully weird and often outright bizarre world of Night Vale.</p>
+<p>From Wikipedia:<span class="sidenote-number"></span><span class="sidenote"><a href="https://en.wikipedia.org/wiki/Welcome_to_Night_Vale" class="uri">https://en.wikipedia.org/wiki/Welcome_to_Night_Vale</a></span></p>
+<blockquote>
+<p>Welcome to Night Vale is a podcast presented as a radio show for the fictional town of Night Vale, reporting on the strange events that occur within it.</p>
+</blockquote>
+<p>One of my favourite parts of the show comes right at the very end, after the credits and</p>
+<p>Inspired by other fun R packages such as <code>fortunes</code><span class="sidenote-number"></span><span class="sidenote"><a href="https://cran.r-project.org/web/packages/fortunes/index.html" class="uri">https://cran.r-project.org/web/packages/fortunes/index.html</a></span>, I wanted to create a function that would print a random WTNV proverb.</p>
+<p>More specifically, I was keen to practice my webscraping and data-cleaning, and this was a nice little dataset to play with.</p>
+<div id="todays-proverb" class="section level2">
+<h2>Today’s proverb:</h2>
+<p>Fortunately, some more diligent fans than I have already spent some time extracting the proverbs into a table, available from the WTNV Fandom site.<span class="sidenote-number"></span><span class="sidenote"><a href="https://nightvale.fandom.com/wiki/List_of_Proverbs" class="uri">https://nightvale.fandom.com/wiki/List_of_Proverbs</a></span></p>
+<p>So the first step was to scrap the data from this table into R, by passing the <code>tr</code> class (used to define a row in a HTML table) to the <code>extract_nodes()</code> function of <code>rvest</code>, and then extracting the text from these elements.</p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote">I used the <code>annotater</code> package to automagically create the descriptions of each package.</span></p>
+<pre class="r"><code># Load the relevant packages
+library(rvest) # Easily Harvest (Scrape) Web Pages
+library(dplyr) # A Grammar of Data Manipulation
+library(tidyr) # Tidy Messy Data
+library(stringr) # Simple, Consistent Wrappers for Common String Operations
+
+# Read HTML from website
+tab &lt;- read_html(&quot;https://nightvale.fandom.com/wiki/List_of_Proverbs&quot;) %&gt;%
+  #Extract nodes
+  html_nodes(&quot;tr&quot;) %&gt;%
+  # Extract
+  html_text()
+
+head(tab)</code></pre>
+<pre><code>## [1] &quot;Episode No.\n\nTitle\n\nRelease Date\n&quot;                                                       
+## [2] &quot;1\n\n\&quot;Pilot\&quot;\n\n15 June 2012\n&quot;                                                             
+## [3] &quot;Look to the north. Keep looking. There&#39;s nothing coming from the south.\n&quot;                    
+## [4] &quot;2\n\n\&quot;Glow Cloud\&quot;\n\n1 July 2012\n&quot;                                                         
+## [5] &quot;\nMen are from Mars; women are from Venus; Earth is a hallucination; podcasts are dreams.\n\n&quot;
+## [6] &quot;3\n\n\&quot;Station Management\&quot;\n\n15 July 2012\n&quot;</code></pre>
+<p>This gives us a character string of 396 elements, where each element is a unique row in the table. This presented two immediate problems:</p>
+<ul>
+<li>The way the table is set-up, the information for each episode is split across two rows, and so we need to extract every 1st and 2nd element seperately and then rejoin them to create the proper dataset.</li>
+<li>Multiple variables (the episode number, title and airdate) are contained within a single element of the vector (e.g. ‘1\n\n“Pilot”\n\n15 June 2012\n’).</li>
+</ul>
+</div>
+<div id="cleaning-the-data" class="section level2">
+<h2>Cleaning the data</h2>
+<div id="meta-data" class="section level3">
+<h3>Meta-data</h3>
+<p>I decided to start with the slightly harder task of cleaning the episode metadata (number, title and airdate) first.</p>
+<p>I first removed the header row (<code>tab[-1]</code>), converted it to a dataframe and extracted every odd row (once I removed the header, the metadata went from being on every even row to every odd row), making use of the <code>slice()</code> and <code>row_number()</code> functions from <code>dplyr</code>.</p>
+<p>After this, I removed information on the proverbs from the live shows, which are presented in a second table at the end of the scraped webpage, by removing all rows after (and including) the row containing the header for that table.</p>
+<p>I then needed to deal with the fact that three variables were contained in a single column in the dataframe. Fortunately, the variables were consistently seperated by a common delimiter (“\n\n”) which allowed me to use <code>separate()</code> from <code>tidyr</code> to split the single column into three new variables.</p>
+<p>Finally, I removed all quotation marks from the three new variables,<span class="sidenote-number"></span><span class="sidenote">I appreciate this could be done in one step using dplyr::across(), but R kept hanging when I tried it and it wasn’t the focus of this project, so I moved on!</span> and removed the trailing newline charater from <code>airdate</code>.</p>
+<pre class="r"><code>meta &lt;- tab[-1] %&gt;%
+  # Convert vector to dataframe
+  data.frame(number = .) %&gt;%
+  # Extract every odd row
+  slice(which(row_number() %% 2 == 1)) %&gt;%
+  # Remove live shows
+  slice(1:which(.$number == &quot;Show No.\n\nTitle\n\nRelease Date\n&quot;) - 1) %&gt;%
+  # Split into component parts
+  separate(number,
+           c(&quot;number&quot;, &quot;title&quot;, &quot;airdate&quot;),
+           sep = &#39;\n\n&#39;) %&gt;%
+  # Remove quotes from all variables
+  mutate(
+    title = stringr::str_replace_all(title, &#39;\&quot;&#39;, &quot;&quot;),
+    number = stringr::str_replace_all(number, &#39;\&quot;&#39;, &quot;&quot;),
+    airdate = stringr::str_replace_all(airdate, &#39;\&quot;&#39;, &quot;&quot;)
+  ) %&gt;%
+  # Remove trailing newline character from airdate/
+  mutate(airdate = stringr::str_replace(airdate, &quot;\n&quot;, &quot;&quot;))
+
+head(meta)</code></pre>
+<pre><code>##   number                   title          airdate
+## 1      1                   Pilot     15 June 2012
+## 2      2              Glow Cloud      1 July 2012
+## 3      3      Station Management     15 July 2012
+## 4      4             PTA Meeting    1 August 2012
+## 5      5 The Shape in Grove Park   15 August 2012
+## 6      6          The Drawbridge 1 September 2012</code></pre>
+</div>
+<div id="proverb-text" class="section level3">
+<h3>Proverb text</h3>
+<p>I used a similar approach to clean the proverb data, taking every even row from the <code>tab</code> string and removing those proverbs from the live shows. Out of interest, I also created two additional variables, which count the number of characters and words in each proverb.</p>
+<p>Once I had this done, I clean leading and trailing newline characters (I needed to retain internal newline characters as some proverbs are list-like) and create a unique numeric ID for each episode, as the <code>number</code> variable often had part indicators (19A and 19B). Finally, I merged the proverb data with the metadata created above to create the final dataset.</p>
+<pre class="r"><code>proverb_df &lt;- tab[-1] %&gt;%
+  # Convert vector to dataframe
+  data.frame(proverb = .) %&gt;%
+  # Extract every even row
+  slice(which(row_number() %% 2 == 0)) %&gt;%
+  # Remove proverbs from live shows
+  slice(1:which(.$proverb == &quot;1\n\n\&quot;Condos\&quot;\n\n25 September 2013\n&quot;) -
+          1) %&gt;%
+  # Generate variables with # of character/words for each proverb
+  mutate(
+    proverb_len_char = nchar(proverb),
+    proverb_len_word = str_count(proverb, &#39;\\w+&#39;)
+  ) %&gt;%
+  # Clear random newlines at start and end of proverbs
+  mutate(
+    proverb = str_replace(proverb, &quot;\n\n$&quot;, &quot;&quot;),
+    proverb = str_replace(proverb, &quot;\n$&quot;, &quot;&quot;),
+    proverb = str_replace(proverb, &quot;^\n&quot;, &quot;&quot;)
+  ) %&gt;%
+  # Add unique id
+  mutate(id = seq_along(1:n())) %&gt;%
+  # Bind to metadata and reorder
+  cbind(meta, .) %&gt;%
+  select(id, everything()) %&gt;%
+  tibble()
+  
+
+head(proverb_df)</code></pre>
+<pre class="fullwidth-output"><code>## # A tibble: 6 x 7
+##      id number title   airdate  proverb        proverb_len_char proverb_len_word
+##   &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;                     &lt;int&gt;            &lt;int&gt;
+## 1     1 1      Pilot   15 June~ Look to the n~               72               13
+## 2     2 2      Glow C~ 1 July ~ Men are from ~               90               15
+## 3     3 3      Statio~ 15 July~ There&#39;s a spe~               66               13
+## 4     4 4      PTA Me~ 1 Augus~ What has four~              141               30
+## 5     5 5      The Sh~ 15 Augu~ A million dol~               64               13
+## 6     6 6      The Dr~ 1 Septe~ Lost? Confuse~               72               12</code></pre>
+</div>
+</div>
+<div id="get-a-random-proverb" class="section level2">
+<h2>Get a random proverb</h2>
+<p>The last thing to do was to create a little function that returns a nicely formatted version of a random proverb or of a certain proverb given an ID.</p>
+<pre class="r"><code>nightvale_proverb &lt;- function(id) {
+  
+if (!hasArg(id)) {
+  id &lt;- sample(proverb_df$id,1)
+}  
+  
+message(proverb_df$proverb[id],
+        &quot;\n    -- \&quot;&quot;,
+        proverb_df$title[id],
+        &quot;\&quot;, &quot;,
+        proverb_df$airdate[id])
+  
+}  
+
+# Get a random proverb
+nightvale_proverb()</code></pre>
+<pre><code>## Our money back guarantee: when you die, the world gets your money back.
+##     -- &quot;A Matter of Blood Part 2&quot;, 15 May 2018</code></pre>
+<pre class="r"><code># And a personal favourite
+nightvale_proverb(22)</code></pre>
+<pre><code>## Ask your doctor if right is left for you.
+##     -- &quot;A Memory of Europe&quot;, 15 April 2013</code></pre>
+<p>And that’s it - a fun half-hour exercise, and an excuse to do some webscraping and data-cleaning. I plan to convert this into a small little GitHub-only package in the future, but it might not be for a while. So for now, good night, Night Vale. Good night.</p>
+</div>

@@ -7,7 +7,7 @@ categories:
   - side-project
   - R
 tags: []
-excerpt: Put excerpt here
+excerpt: 
 math: no
 meta: yes
 ---

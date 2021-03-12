@@ -7,7 +7,7 @@ categories:
   - side-project
   - R
 tags: []
-excerpt: 
+excerpt: "Why would you wanna think outside the box? The box is steel, and locked, and buried deeply underground. It's so safe here. Why would you want to leave?"
 math: no
 meta: yes
 ---
@@ -17,7 +17,7 @@ knitr::opts_chunk$set(eval = FALSE)
 source(here::here("R","sidenote.R"))
 ```
 
-Following a recommendation from a friend, I recently got really into the wonderfully weird and often outright bizarre world of the Welcome to Night Vale podcast. From Wikipedia:`r sidenote_link("https://en.wikipedia.org/wiki/Welcome_to_Night_Vale")`"Welcome to Night Vale is a podcast presented as a radio show for the fictional town of Night Vale, reporting on the strange events that occur within it." 
+Following a recommendation from a friend, I recently got really into the wonderfully weird and often outright bizarre world of the Welcome to Night Vale podcast. From Wikipedia:`r sidenote_link("https://en.wikipedia.org/wiki/Welcome_to_Night_Vale")` "*Welcome to Night Vale is a podcast presented as a radio show for the fictional town of Night Vale, reporting on the strange events that occur within it.*" 
 
 One of my favourite parts of the show comes right at the very end, when the credit announcer reads out "today's proverb". These are without fail very strange, but always give me laugh. For example:
 

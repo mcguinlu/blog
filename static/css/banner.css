@@ -30,24 +30,23 @@
   .hexagon .fill {
     fill: #4A4A4A;
   }
-  
-  .hexagon .nofill:hover {
-    fill: #4A4A4A;
-  }
-  
+
   .hexagon .nofill {
     fill: transparent;
   }
   
   .hexagon .nofill:hover {
-    fill: #e5a454;
+    fill: #4a4a4a;
+    opacity: 0.4;
   }
 
   .hexagon .fill:hover {
-    fill: #e5a454;
+    fill: black;
+    opacity: 0.5;
   }
 
   .hexagon .fill.nofill:hover {
-    fill: #e5a454;
+    fill: #4a4a4a;
+    opacity: 0.4;
   }
   

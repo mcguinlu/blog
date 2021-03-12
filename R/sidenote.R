@@ -17,4 +17,14 @@ sidenote <- function(text) {
   }
   
 }
+
+sidenote_link <- function(text) {
+    return(
+      paste0(
+        "<span class=\"sidenote-number\"></span><span class=\"sidenote\">See <a href = \"",
+        text,
+        "\">here</a>.</span>"
+      )
+    )
+  }
   

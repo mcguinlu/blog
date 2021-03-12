@@ -188,6 +188,7 @@ label.margin-toggle {
 
 h1 {
   font-weight: 400;
+  color: #4a4a4a;
   margin-top: 4rem;
   margin-bottom: 1.5rem;
   font-size: 3rem;
@@ -663,8 +664,4 @@ label.margin-toggle:not(.sidenote-number) { display: none; }
 
 .list-page ul li {
   font-size:14px;
-}
-
-.li.p {
-  font-size: 1rem;
 }

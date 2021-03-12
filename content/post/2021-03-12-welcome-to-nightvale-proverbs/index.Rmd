@@ -1,5 +1,5 @@
 ---
-title: Welcome to Night Vale Proverbs
+title: Welcome to Night Vale proverbs
 author: Luke McGuinness
 date: '2021-03-12'
 slug: welcome-to-nightvale-proverbs
@@ -17,29 +17,22 @@ knitr::opts_chunk$set(eval = FALSE)
 source(here::here("R","sidenote.R"))
 ```
 
+Following a recommendation from a friend, I recently got really into the wonderfully weird and often outright bizarre world of the Welcome to Night Vale podcast. From Wikipedia:`r sidenote_link("https://en.wikipedia.org/wiki/Welcome_to_Night_Vale")`"Welcome to Night Vale is a podcast presented as a radio show for the fictional town of Night Vale, reporting on the strange events that occur within it." 
 
+One of my favourite parts of the show comes right at the very end, when the credit announcer reads out "today's proverb". These are without fail very strange, but always give me laugh. For example:
 
-As part of my "Oh god, what am I going to do during lockdown?!" phase, I got really into the wonderfully weird and often outright bizarre world of Night Vale.
+>It's not the size of the dog in the fight, it's the size of the other dog in the fight.
 
-From Wikipedia:`r sidenote("https://en.wikipedia.org/wiki/Welcome_to_Night_Vale")`
+Inspired by other fun R packages such as `fortunes``r sidenote_link("https://cran.r-project.org/web/packages/fortunes/index.html")`, I wanted to create a function that would print a random, nicely formatted WTNV proverb. Additionally, I was keen to practice my webscraping and data-cleaning, and this was a nice little problem to play around with.
 
-> Welcome to Night Vale is a podcast presented as a radio show for the fictional town of Night Vale, reporting on the strange events that occur within it. 
+## Getting the data
 
-One of my favourite parts of the show comes right at the very end, after the credits and
+Fortunately, some more diligent fans than I have already spent some time extracting the proverbs into a table, available from the WTNV Fandom site.`r sidenote_link("https://nightvale.fandom.com/wiki/List_of_Proverbs")`
 
-Inspired by other fun R packages such as `fortunes``r sidenote("https://cran.r-project.org/web/packages/fortunes/index.html")`, I wanted to create a function that would print a random WTNV proverb.
-
-More specifically, I was keen to practice my webscraping and data-cleaning, and this was a nice little dataset to play with.
-
-## Today's proverb:
-
-Fortunately, some more diligent fans than I have already spent some time extracting the proverbs into a table, available from the WTNV Fandom site.`r sidenote("https://nightvale.fandom.com/wiki/List_of_Proverbs")`
-
-So the first step was to scrap the data from this table into R, by passing the `tr` class (used to define a row in a HTML table) to the `extract_nodes()` function of `rvest`, and then extracting the text from these elements.
-
+My first step was to scrap the data from this table into R, by passing the `tr` class (used to define a row in a HTML table) to the `extract_nodes()` function of `rvest`, and then extracting the text contained in these elements.
 
 `r tufte::margin_note("I used the <code>annotater</code> package to automagically create the descriptions of each package.")`
-``` {r, eval = TRUE, warning = FALSE, message = FALSE}
+``` {r, eval = TRUE, warning = FALSE, message = FALSE, class.output="fullwidth-output"}
 # Load the relevant packages
 library(rvest) # Easily Harvest (Scrape) Web Pages
 library(dplyr) # A Grammar of Data Manipulation
@@ -58,22 +51,22 @@ head(tab)
 
 This gives us a character string of `r length(tab)` elements, where each element is a unique row in the table. This presented two immediate problems:
 
-  * The way the table is set-up, the information for each episode is split across two rows, and so we need to extract every 1st and 2nd element seperately and then rejoin them to create the proper dataset.
+  * The way the table is laid out, the information for each episode is split across two rows, and so I need to extract every odd and even element seperately and then rejoin them to create the proper dataset.
   * Multiple variables (the episode number, title and airdate) are contained within a single element of the vector (e.g. '`r gsub("\n","\\\\\\\\n",tab[2])`'). 
   
 ## Cleaning the data
 
 ### Meta-data
 
-I decided to start with the slightly harder task of cleaning the episode metadata (number, title and airdate) first. 
+I decided to start with the slightly harder task of cleaning the episode meta-data (number, title and airdate) first. 
 
-I first removed the header row (`tab[-1]`), converted it to a dataframe and extracted every odd row (once I removed the header, the metadata went from being on every even row to every odd row), making use of the `slice()` and `row_number()` functions from `dplyr`.
+Having removed the header row (`tab[-1]`), I converted the vector to a dataframe and extracted every odd row (once I removed the header, the meta-data went from being on every even row to every odd row), making use of the `slice()` and `row_number()` functions from `dplyr`.
 
 After this, I removed information on the proverbs from the live shows, which are presented in a second table at the end of the scraped webpage, by removing all rows after (and including) the row containing the header for that table. 
 
 I then needed to deal with the fact that three variables were contained in a single column in the dataframe. Fortunately, the variables were consistently seperated by a common delimiter ("\\n\\n") which allowed me to use `separate()` from `tidyr` to split the single column into three new variables.
 
-Finally, I removed all quotation marks from the three new variables,`r sidenote("I appreciate this could be done in one step using dplyr::across(), but R kept hanging when I tried it and it wasn't the focus of this project, so I moved on!")` and removed the trailing newline charater from `airdate`.
+Finally, I removed all quotation marks from the three new variables,`r sidenote("I appreciate this could be done in one step using <code>dplyr::across()</code>, but R kept hanging when I tried it and it wasn't the focus of this project, so I moved on!")` and removed the trailing newline charater from `airdate`.
 
 ```{r, eval = TRUE}
 meta <- tab[-1] %>%
@@ -102,9 +95,9 @@ head(meta)
 
 ### Proverb text
 
-I used a similar approach to clean the proverb data, taking every even row from the `tab` string and removing those proverbs from the live shows. Out of interest, I also created two additional variables, which count the number of characters and words in each proverb.
+I used a similar approach to clean the proverb data, taking every even row from the `tab` vector and again removing those proverbs from the live shows. Out of interest, I also created two additional variables, which count the number of characters and words in each proverb.
 
-Once I had this done, I clean leading and trailing newline characters (I needed to retain internal newline characters as some proverbs are list-like) and create a unique numeric ID for each episode, as the `number` variable often had part indicators (19A and 19B). Finally, I merged the proverb data with the metadata created above to create the final dataset.
+Once I had this done, I removed any leading and trailing newline characters (I needed to retain internal newline characters as some proverbs are list-like) and create a unique numeric ID for each episode, as the `number` variable often had part indicators (19A and 19B). Finally, I merged the proverb data with the meta-data obtained above to create the final dataset.
 
 ```{r, eval = TRUE, class.output="fullwidth-output"}
 proverb_df <- tab[-1] %>%
@@ -144,11 +137,14 @@ The last thing to do was to create a little function that returns a nicely forma
 ```{r, eval = TRUE}
 
 nightvale_proverb <- function(id) {
-  
+
+# If an ID is provided, use that
+# If not, get a random ID
 if (!hasArg(id)) {
   id <- sample(proverb_df$id,1)
 }  
   
+# Format the resulting message  
 message(proverb_df$proverb[id],
         "\n    -- \"",
         proverb_df$title[id],
@@ -165,4 +161,12 @@ nightvale_proverb(22)
 
 ```
 
-And that's it - a fun half-hour exercise, and an excuse to do some webscraping and data-cleaning. I plan to convert this into a small little GitHub-only package in the future, but it might not be for a while. So for now, good night, Night Vale. Good night.
+And that's it - a fun half-hour exercise, and an excuse to do some webscraping and data-cleaning. I plan to convert this into a small little GitHub-only package in the future, but it might not be for a while. So for now... 
+
+<!--html_preserve-->
+<blockquote>
+<p style = "text-align:centre">
+Good night, Night Vale. Good night.
+</p>
+</blockquote>
+<!--/html_preserve-->

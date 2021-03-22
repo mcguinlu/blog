@@ -1,6 +1,6 @@
 baseurl = "https://mcguinlu.netlify.app/"
 languageCode = "en-us"
-title = "Note To Self"
+title = "Hexations"
 theme = "tuftesque"
 disqusShortname = ""
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_cache$", "\\.knit\\.md$", "\\.utf8\\.md$"]

@@ -22,7 +22,7 @@
   .attr("class", "banner-text")
   .attr('text-anchor', "middle")
   .attr("alignment-baseline","central")
-  .text("Note To Self")
+  .text("Hexations")
   .style('fill', '#4a4a4a')
   
   
@@ -37,7 +37,7 @@
   .attr("class", "banner-text")
   .attr('text-anchor', "middle")
   .attr("alignment-baseline","central")
-  .text("Note To Self")
+  .text("Hexations")
   .style('fill', '#4a4a4a')
   
   svg2.append("g")
@@ -59,7 +59,7 @@
   .attr("class", "banner-text")
   .attr('text-anchor', "middle")
   .attr("alignment-baseline","central")
-  .text("Note To Self")
+  .text("Hexations")
   .style('fill', '#4a4a4a')
   
   svg3.append("g")
@@ -81,7 +81,7 @@
   .attr("class", "banner-text")
   .attr('text-anchor', "middle")
   .attr("alignment-baseline","central")
-  .text("Note To Self")
+  .text("Hexations")
   .style('fill', '#4a4a4a')
   
   svg4.append("g")

@@ -1,5 +1,5 @@
 ---
-title: Building the NTS banner
+title: Building the Hexations banner
 author: Luke McGuinness
 date: '2021-02-24'
 slug: building-the-nts-banner
@@ -9,7 +9,7 @@ categories:
   - css
   - javascript
 tags: []
-excerpt: A walkthrough of creating the NTS banner using D3.js
+excerpt: A walkthrough of creating this blog's banner using D3.js
 math: no
 meta: yes
 ---
@@ -80,7 +80,7 @@ svg.append("text")
 .attr("class", "banner-text")
 .attr('text-anchor', "middle")
 .attr("alignment-baseline", "central")
-.text("Note To Self")
+.text("Hexations")
 .style('fill', '#4a4a4a')
 ```
 
@@ -114,7 +114,7 @@ svg.append("g")
 
 The important thing to note here is that the "class" of each hexagon is being defined by a function that quasi-randomly assigns a value of either "fill" or "nofill", so that every time a user visits or refreshes the page, they should see a different starting configuration of filled hexagons. I say quasi-randomly, because the function produces a random number for each hexagon, and if the number is lower than some threshold, it assigns a class of "fill". I defined the threshold to decrease dramatically as you move left-to-right across the hexagon grid in order to create the cluster of filled hexagons on the left-hand side of the image.
 
-In the corresponding CSS, I defined fill colours for the hexagons. The default colour for hexagons with a class of "nofill" was transparent, allowing the background colour to show through. This was necessary as otherwise the "Note to Self" text would not be visible. Alternatively, if the hexagon had a class of "fill", it was coloured a darker grey:
+In the corresponding CSS, I defined fill colours for the hexagons. The default colour for hexagons with a class of "nofill" was transparent, allowing the background colour to show through. This was necessary as otherwise the "Hexations" text would not be visible. Alternatively, if the hexagon had a class of "fill", it was coloured a darker grey:
 
 ```{css}
 .hexagon {
@@ -313,7 +313,7 @@ Everything needed to reproduce the banner is included in the hidden code block b
   .attr("class", "banner-text")
   .attr('text-anchor', "middle")
   .attr("alignment-baseline","central")
-  .text("Note To Self")
+  .text("Hexations")
   .style('fill', '#4a4a4a')
   
   svg.append("g")

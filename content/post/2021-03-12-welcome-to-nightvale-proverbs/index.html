@@ -7,11 +7,12 @@ categories:
   - side-project
   - R
 tags: []
-excerpt: "Why would you wanna think outside the box? The box is steel, and locked, and buried deeply underground. It's so safe here. Why would you want to leave?"
+excerpt: '"Why would you wanna think outside the box? The box is steel, and locked, and buried deeply underground. It is so safe here. Why would you want to leave?"'
 math: no
 meta: yes
 ---
 
+<script src="index_files/header-attrs/header-attrs.js"></script>
 
 
 <p>Following a recommendation from a friend, I recently got really into the wonderfully weird and often outright bizarre world of the Welcome to Night Vale podcast. From Wikipedia:<span class="sidenote-number"></span><span class="sidenote">See <a href = "https://en.wikipedia.org/wiki/Welcome_to_Night_Vale">here</a>.</span> “Welcome to Night Vale is a podcast presented as a radio show for the fictional town of Night Vale, reporting on the strange events that occur within it.”</p>
@@ -45,7 +46,7 @@ head(tab)</code></pre>
 ## [4] &quot;2\n\n\&quot;Glow Cloud\&quot;\n\n1 July 2012\n&quot;                                                         
 ## [5] &quot;\nMen are from Mars; women are from Venus; Earth is a hallucination; podcasts are dreams.\n\n&quot;
 ## [6] &quot;3\n\n\&quot;Station Management\&quot;\n\n15 July 2012\n&quot;</code></pre>
-<p>This gives us a character string of 398 elements, where each element is a unique row in the table. This presented two immediate problems:</p>
+<p>This gives us a character string of 404 elements, where each element is a unique row in the table. This presented two immediate problems:</p>
 <ul>
 <li>The way the table is laid out, the information for each episode is split across two rows, and so I need to extract every odd and even element seperately and then rejoin them to create the proper dataset.</li>
 <li>Multiple variables (the episode number, title and airdate) are contained within a single element of the vector (e.g. ‘1\n\n“Pilot”\n\n15 June 2012\n’).</li>
@@ -62,7 +63,7 @@ head(tab)</code></pre>
 <p>Finally, I removed all quotation marks from the three new variables,<span class="sidenote-number"></span><span class="sidenote">I appreciate this could be done in one step using <code>dplyr::across()</code>, but R kept hanging when I tried it and it wasn’t the focus of this project, so I moved on!</span> and removed the trailing newline charater from <code>airdate</code>.</p>
 <pre class="r"><code>meta &lt;- tab[-1] %&gt;%
   # Convert vector to dataframe
-  data.frame(number = .) %&gt;%
+  data.frame(number = ., stringsAsFactors = FALSE) %&gt;%
   # Extract every odd row
   slice(which(row_number() %% 2 == 1)) %&gt;%
   # Remove live shows
@@ -95,7 +96,7 @@ head(meta)</code></pre>
 <p>Once I had this done, I removed any leading and trailing newline characters (I needed to retain internal newline characters as some proverbs are list-like) and create a unique numeric ID for each episode, as the <code>number</code> variable often had part indicators (19A and 19B). Finally, I merged the proverb data with the meta-data obtained above to create the final dataset.</p>
 <pre class="r"><code>proverb_df &lt;- tab[-1] %&gt;%
   # Convert vector to dataframe
-  data.frame(proverb = .) %&gt;%
+  data.frame(proverb = ., stringsAsFactors = FALSE) %&gt;%
   # Extract every even row
   slice(which(row_number() %% 2 == 0)) %&gt;%
   # Remove proverbs from live shows
@@ -154,8 +155,8 @@ message(proverb_df$proverb[id],
 
 # Get a random proverb
 nightvale_proverb()</code></pre>
-<pre><code>## The word “motel” is an amalgam of the words “hotel” and “murder.”
-##     -- &quot;Civic Changes&quot;, 15 September 2015</code></pre>
+<pre><code>## Don’t bite the hand that feeds you. Go for the legs. It’ll throw them off-balance.
+##     -- &quot;Rattlesnake Rest&quot;, 15 November 2020</code></pre>
 <pre class="r"><code># And a personal favourite
 nightvale_proverb(22)</code></pre>
 <pre><code>## Ask your doctor if right is left for you.

@@ -7,7 +7,7 @@ categories:
   - side-project
   - R
 tags: []
-excerpt: "Why would you wanna think outside the box? The box is steel, and locked, and buried deeply underground. It's so safe here. Why would you want to leave?"
+excerpt: '"Why would you wanna think outside the box? The box is steel, and locked, and buried deeply underground. It is so safe here. Why would you want to leave?"'
 math: no
 meta: yes
 ---
@@ -71,7 +71,7 @@ Finally, I removed all quotation marks from the three new variables,`r sidenote(
 ```{r, eval = TRUE}
 meta <- tab[-1] %>%
   # Convert vector to dataframe
-  data.frame(number = .) %>%
+  data.frame(number = ., stringsAsFactors = FALSE) %>%
   # Extract every odd row
   slice(which(row_number() %% 2 == 1)) %>%
   # Remove live shows
@@ -102,7 +102,7 @@ Once I had this done, I removed any leading and trailing newline characters (I n
 ```{r, eval = TRUE, class.output="fullwidth-output"}
 proverb_df <- tab[-1] %>%
   # Convert vector to dataframe
-  data.frame(proverb = .) %>%
+  data.frame(proverb = ., stringsAsFactors = FALSE) %>%
   # Extract every even row
   slice(which(row_number() %% 2 == 0)) %>%
   # Remove proverbs from live shows

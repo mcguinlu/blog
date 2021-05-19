@@ -26,5 +26,9 @@ sidenote_link <- function(text) {
         "\">here</a>.</span>"
       )
     )
-  }
-  
+}
+
+
+blockquote_author <- function(text, author){
+  paste0(htmltools::p(text), tufte::quote_footer(author))
+}

@@ -1,24 +1,59 @@
 ---
-title: Baby Yoda in R
+title: Building a levitating LEGO Baby Yoda model with R
 author: Luke McGuinness
 date: '2021-02-02'
 slug: baby-yoda-in-r
 categories:
   - R
   - side-project
-  - Lego
+  - LEGO
 tags: []
 math: no
 meta: yes
-toc: no
-draft: true
+excerpt : "\"Always more questions than answers, there are.\""
 ---
 
-<link href="index_files/anchor-sections/anchor-sections.css" rel="stylesheet" />
-<script src="index_files/anchor-sections/anchor-sections.js"></script>
+<script src="index_files/header-attrs/header-attrs.js"></script>
 
-<div id="TOC">
-no
+
+<div id="intro" class="section level2">
+<h2>Motivation</h2>
+<p>As a kid I was fascinated with LEGO sets, and last year, with the additional free time that lockdown provided, I got back into playing around with some old pieces. Discovery of the <em>amazing</em> <a href="https://github.com/ryantimpe/brickr"><code>brickr</code></a> R package, which allows you to create 3D models from LEGO bricks, led me to marry my interests and try to create a levitating LEGO Baby Yoda/Grogu model.</p>
+<p>The finished product is shown in the GIF below:</p>
+<p><div id="gif"></div></p>
+<p><img src="babyyoda.gif" style="display: block; margin: auto;" /></p>
+<p> </p>
+<blockquote>
+<p>
+Always pass on what you have learned.
+</p>
+<footer>
+Yoda, “Star Wars: Return of the Jedi”
+</footer>
+</blockquote>
+<p>Taking the true Yoda’s advice, this post contains the detailed brick requirements and building instructions for creating your own Baby Yoda/Grogu LEGO model.</p>
+<p> </p>
 </div>
-
-<!--more-->
+<div id="designing-the-model" class="section level2">
+<h2>Designing the model</h2>
+<p>The model was designed using <code>brickr</code> and was adapted from the LEGO Baby Yoda/Grogu model originally designed by Ryan Timpe.<span class="sidenote-number"></span><span class="sidenote">See <a href="https://gist.github.com/ryantimpe/3893fdd0f94138d027bae35bf38b57c7">here</a> for the code for that model, and <a href="https://github.com/ryantimpe">here</a> for Ryan’s GitHub profile.</span> Adaption was necessary, as the original model contained a number of “floating bricks” (i.e. bricks that are not supported by another brick from either above or below), which work fine when rendering the model in R but cannot be used in a physical version.</p>
+<p>All data and code needed to reproduce the model are available from the GitHub repository for this project.<span class="sidenote-number"></span><span class="sidenote">See <a href = "https://github.com/mcguinlu/baby-yoda">here</a>.</span></p>
+<div id="build-pieces" class="section level3">
+<h3>Build pieces</h3>
+<p>The pieces you will need to build your own LEGO Baby Yoda/Grogu model are listed in the image below. These can be acquired from the Pick A Brick service on the LEGO store website.<span class="sidenote-number"></span><span class="sidenote">See <a href = "https://www.lego.com/en-gb/page/static/pick-a-brick">here</a>.</span> The total cost for all pieces included in this model was ~£30 pounds.</p>
+<p><img src="babyyoda_pieces.png" width="1200" style="display: block; margin: auto;" /></p>
+</div>
+<div id="instructions" class="section level3">
+<h3>Instructions</h3>
+<p>The instructions below will guide you through building your own Baby Yoda, using the pieces detailed in the previous section. It can sometimes be awkward to get some of the pieces to work together when building from the bottom up, as they are supported by a brick on the next level up. In this case, a useful tip is to try building down (i.e. descending through the steps).</p>
+<p><img src="babyyoda_instructions.png" width="900" style="display: block; margin: auto;" /></p>
+<p>The finished model should look something like this:</p>
+<p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote">More photos of the finished model from different angles can be found <a href="https://github.com/mcguinlu/baby-yoda/tree/master/finished_model">here</a>.</span>
+<img src="by_front.jpg" width="1728" style="display: block; margin: auto;" /></p>
+<p> </p>
+</div>
+</div>
+<div id="make-him-float" class="section level2">
+<h2>Make him float!</h2>
+<p>As shown in the GIF at the start of this post,<span class="sidenote-number"></span><span class="sidenote"><a href="#gif">Jump to GIF</a></span> this model was designed to work with a electromagnetic levitation display to give it a true-to-life feel. I used the Hongzer Magnetic Levitation Platform (£6-7 pounds from Amazon),<span class="sidenote-number"></span><span class="sidenote">See <a href = "https://www.amazon.co.uk/gp/product/B07YKY6K8J/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1">here</a>.</span> but it will (/should!) work with any display where the diameter of the floating magnet is &lt;5.5cm.</p>
+</div>

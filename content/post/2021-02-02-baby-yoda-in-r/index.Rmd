@@ -46,7 +46,9 @@ The model was designed using `brickr` and was adapted from the LEGO Baby Yoda/Gr
 
 All data and code needed to reproduce the model are available from the GitHub repository for this project.`r sidenote_link("https://github.com/mcguinlu/baby-yoda")`
 
-### Build pieces
+&nbsp;
+
+## Build pieces
 
 The pieces you will need to build your own LEGO Baby Yoda/Grogu model are listed in the image below. These can be acquired from the Pick A Brick service on the LEGO store website.`r sidenote_link("https://www.lego.com/en-gb/page/static/pick-a-brick")` The total cost for all pieces included in this model was ~£30 pounds.
 
@@ -54,7 +56,9 @@ The pieces you will need to build your own LEGO Baby Yoda/Grogu model are listed
 knitr::include_graphics("babyyoda_pieces.png")
 ```
 
-### Instructions
+&nbsp;
+
+## Building instructions
 
 The instructions below will guide you through building your own Baby Yoda, using the pieces detailed in the previous section. It can sometimes be awkward to get some of the pieces to work together when building from the bottom up, as they are supported by a brick on the next level up. In this case, a useful tip is to try building down (i.e. descending through the steps).
 

@@ -1,5 +1,5 @@
 ---
-title: Do blurbs predict whether films will pass the Bechdel test?
+title: Blurbs and the Bechdel test
 author: Luke McGuinness
 date: '2021-04-12'
 slug: do-blurbs-predict-whether-films-will-pass-the-bechdel-test
@@ -10,14 +10,14 @@ categories:
   - R
   - side-project
 tags: []
-excerpt: Put excerpt here
+excerpt: Do promotional blurbs predict whether films will pass the Bechdel test?
 math: no
 meta: yes
 draft: true
 ---
 
 ```{r, include=FALSE}
-knitr::opts_chunk$set(eval = FALSE)
+knitr::opts_chunk$set(eval = TRUE, warning = FALSE)
 source(here::here("R","sidenote.R"))
 ```
 
@@ -27,6 +27,8 @@ source(here::here("R","sidenote.R"))
 
 ## Load the data
 
+For this analysis, I used a TidyTuesday dataset on the Bechdel test. `r sidenote_link("https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-03-09/readme.md")``
+
 ```{r}
 library(tidyverse)
 library(tidytext)
@@ -34,36 +36,63 @@ library(tidytext)
 tuesdata <- tidytuesdayR::tt_load('2021-03-09')
 
 movies <- tuesdata$movies %>%
-  select(title, plot, binary) %>%
-  filter(!is.na(plot) & !is.na(binary)) %>%
+  mutate(bechdel = binary) %>%
+  select(title, plot, imdb_rating, bechdel) %>%
+  filter(!is.na(plot) & !is.na(bechdel) & !is.na(imdb_rating)) %>%
   mutate(text = plot) %>%
   select(-plot)
-  
+
+# Number of words per movie blurb
 movies %>%
   unnest_tokens(word, text) %>%
   count(title, name = "total_words") %>%
   ggplot(aes(total_words)) +
-  geom_histogram(fill = "midnightblue", alpha = 0.8)
+  geom_histogram(fill = "darkorange2", alpha = 0.8) +
+  theme_minimal()
 
+
+movies %>%
+  ggplot(aes(y = imdb_rating, x = bechdel)) +
+  geom_boxplot() +
+  theme_minimal()
 ```
 
+I also wanted to have a quick look at the balance between the two outcomes (Pass/Fail) to ensure the dataset was relatively well balanced.
+
+```{r}
+# Number of movies that pass/fail
+movies %>%
+  ggplot(aes(x = bechdel)) +
+  geom_bar(stat = "count", fill = "darkorange2", alpha = 0.8) +
+  theme_minimal()
+
+prop.table(table(movies$bechdel))
+```
+
+It seems there are a few more movies that fail the test, but the split is not too far off 50/50.
+
 ### Build a model
+
+First things first, split the data into training and testing dataset, using the default split of 3/4 training and 1/4 testing.
+
+`r tufte::margin_note("I like using The Answer to the Ultimate Question of Life, the Universe, and Everything a a seed.")`
 
 ```{r}
 library(tidymodels)
 
 set.seed(42)
-review_split <- initial_split(movies, strata = binary)
+review_split <- initial_split(movies, strata = bechdel)
 review_train <- training(review_split)
 review_test <- testing(review_split)
 ```
 
+Next, I made use of the amazing 
 
 ```{r}
 library(textrecipes)
 library(stopwords)
 
-review_rec <- recipe(binary ~ text, data = review_train) %>%
+review_rec <- recipe(bechdel ~ text + imdb_rating, data = review_train) %>%
   step_tokenize(text) %>%
   step_stopwords(text) %>%
   step_tokenfilter(text, max_tokens = 500) %>%
@@ -92,11 +121,11 @@ lasso_wf
 
 `r tufte::margin_note("You may need the development version of <code>recipes</code> for this to work, as per [this issue](https://github.com/tidymodels/tune/issues/192)")`
 
-```{r}
+```{r, cache=TRUE}
 lambda_grid <- grid_regular(penalty(), levels = 40)
 
 set.seed(42)
-review_folds <- bootstraps(review_train, strata = binary)
+review_folds <- bootstraps(review_train, strata = bechdel)
 review_folds
 
 doParallel::registerDoParallel()
@@ -111,4 +140,48 @@ lasso_grid <- tune_grid(
 
 lasso_grid %>%
   collect_metrics()
+```
+
+
+
+```{r}
+best_auc <- lasso_grid %>%
+  select_best("roc_auc")
+
+best_auc
+
+final_lasso <- finalize_workflow(lasso_wf, best_auc)
+
+final_lasso
+
+library(vip)
+
+# final_lasso %>%
+#   fit(review_train) %>%
+#   pull_workflow_fit() %>%
+#   vi(lambda = best_auc$penalty) %>%
+#   group_by(Sign) %>%
+#   arrange(desc(abs(Importance))) %>%
+#   slice(1:20) %>%
+#   ungroup() %>%
+#   mutate(
+#     Importance = abs(Importance),
+#     Variable = str_remove(Variable, "tfidf_text_"),
+#     Variable = fct_reorder(Variable, Importance)
+#   ) %>%
+#   ggplot(aes(x = Importance, y = Variable, fill = Sign)) +
+#   geom_col(show.legend = FALSE) +
+#   facet_wrap(~Sign, scales = "free_y") +
+#   labs(y = NULL)
+
+
+review_final <- last_fit(final_lasso, review_split)
+
+review_final %>%
+  collect_metrics()
+
+review_final %>%
+  collect_predictions() %>%
+  conf_mat(bechdel, .pred_class)
+
 ```

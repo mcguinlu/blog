@@ -1,0 +1,148 @@
+---
+title: Do email templates reduce my workload?
+author: Luke McGuinness
+date: '2021-07-11'
+slug: working-with-emails
+categories:
+  - R
+  - side-project
+tags: 
+excerpt: An attempted before-and-after analysis of email data in R.
+math: no
+meta: yes
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE, warning = F, message = F)
+source(here::here("R","sidenote.R"))
+```
+
+As part of my maintenance of the `robvis` R package, I regularly receive emails from users of the Shiny app version of the tool.`r sidenote_link("https://mcguinlu.shinyapps.io/robvis/")`
+
+One of the main issues I encounter when dealing with these emails is that the initial email does not usually contain all the information I need to help the user (e.g. what data file caused the issues), and so I end up replying requesting this basic information.
+
+To try and head this issue off at the pass, I implemented a email template in March 2020, so that when users click the "Email me!" button on the Shiny app, an email is created and pre-populated with the following text:
+
+``` {text}
+
+This is a template to help me fix your issue as quickly as possible. Please make sure you:
+- detail your issue, and where it occurred [e.g. data upload, generating graphs]
+- attach the file you were trying to upload
+
+Thanks,
+
+Luke
+
+
+```
+
+I recently had the idea to explore whether this email template was actually helping in terms of my workload, by comparing the total number of emails in threads related to the `robvis` grouped by whether the thread occurred before or after the email template was implemented.`r sidenote("Commonly known as a \"before-and-after study\". See [here](https://www.bmj.com/content/349/bmj.g5074).")`
+
+If the template does help, you would expect threads after March 2020 to contain a smaller number of emails, as it would remove the need for my initial email requesting the necessary data and the user's response to this request.
+
+I recently have become quite good at labelling emails related to the different R packages I maintain and moving them to a dedicated Outlook subfolder. As such, I was able to follow a very helpful tutorial to export the `robvis` Outlook folder to a CSV file,`r sidenote_link("https://everydayanalytics.ca/2013/11/how-to-export-your-outlook-inbox-to-csv-for-data-analysis.html")` making sure to use the Outlook->Access->CSV route, so that the final dataset contained information on the date/time of each email. Once imported, I cleaned the data using the following chain:
+
+```{r, eval = TRUE}
+
+library(dplyr)
+
+df <-
+  read.csv("robvis_emails.csv",
+           stringsAsFactors = F,
+           header = F) %>%
+  # Rename the v. unhelpful variable names and select the relevant ones
+  rename(
+    date = V15,
+    text = V14,
+    subject = V5,
+    sender  = V6,
+    subject_normalised = V19
+  ) %>%
+  select(date, sender, subject, subject_normalised, text) %>%
+  # Remove the weird forwarding
+  mutate(subject_normalised = stringr::str_replace(subject_normalised, "Antw: RE: ", "")) %>%
+  # Convert dates and trim character variables
+  mutate(date = as.Date(date, "%d/%m/%Y %H:%M:%S")) %>%
+  mutate_if(is.character, stringr::str_trim) %>%
+  # Group by sender/subject and get count and first date by group
+  group_by(sender, subject_normalised) %>%
+  summarise(Number = n(), date = min(date)) %>%
+  ungroup()
+
+```
+
+One interesting thing I noticed is that, because of the way Outlook works, only the incoming emails (i.e. those sent to my email) in each thread are counted. As a result, several threads appear to only have a single email in them, but in reality, the users emailed me, I emailed them back and then never heard from them again. I _think_ this is because Outlook deals with incoming messages and sent messages differently, but I'm not 100% sure.
+
+I then quickly plotted the data to have a look at the date range it covered.
+
+`r tufte::margin_note("I used the <code>ggannotate</code> widget to help create the annotations for this plot.")`
+
+``` {r, eval = TRUE, echo = FALSE}
+library(ggplot2) 
+
+ggplot(df) +
+  aes(x = date) +
+  aes(y = Number) +
+  geom_point() +
+  scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+  labs(title = "Number of incoming emails per thread") +
+  geom_text(
+    data = data.frame(
+      x = as.Date("2021-01-01"),
+      y = 9,
+      label = "This long thread (N = 10) was with a colleague in\nBristol, and involved a discussion of a\ncustom plot type."
+    ),
+    mapping = aes(x = x,
+                  y = y,
+                  label = label),
+    angle = 0L,
+    lineheight = 1L,
+    hjust = 0.5,
+    vjust = 0.5,
+    colour = "black",
+    family = "sans",
+    fontface = "plain",
+    inherit.aes = FALSE,
+    show.legend = FALSE
+  ) +
+  geom_curve(
+    data = data.frame(
+      x = as.Date("2020-10-03"),
+      y = 8.9861196506449,
+      xend = as.Date("2020-07-17"),
+      yend = 9.85487558594912
+    ),
+    mapping = aes(
+      x = x,
+      y = y,
+      xend = xend,
+      yend = yend
+    ),
+    angle = 90L,
+    colour = "black",
+    curvature = -0.34,
+    arrow = structure(list(
+      angle = 30,
+      length = structure(
+        0.1,
+        class = "unit",
+        valid.unit = 2L,
+        unit = "inches"
+      ),
+      ends = 2L,
+      type = 2L
+    ),
+    class = "arrow"),
+    inherit.aes = FALSE,
+    show.legend = FALSE
+  )
+
+
+```
+
+As it happens, I apparently only started adding emails to the `robvis` Outlook subfolder after July 2020. As the email template was implemented in March 2020, my plan to do a before-and-after comparison to see if it had any impact on the number of emails in each thread was scuppered. 
+
+I could always go back through my emails from before July 2020 and categorise them appropriately, or alternatively, import my entire inbox and come up with a data cleaning plan that would extract the relevant emails. However, as this was intended as a quick exercise, I decided to park the analysis.
+
+Still, it gave me an excuse to work with email data in R, so not a total loss!
+

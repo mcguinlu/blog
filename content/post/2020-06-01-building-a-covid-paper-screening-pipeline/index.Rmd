@@ -18,3 +18,11 @@ draft: yes
 knitr::opts_chunk$set(eval = FALSE)
 source(here::here("R","sidenote.R"))
 ```
+
+### Motivation
+
+### Methods
+
+### Shiny App
+
+### Lessons learned

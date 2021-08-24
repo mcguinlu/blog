@@ -10,54 +10,132 @@ categories:
   - R
   - side-project
 tags: []
-excerpt: Do promotional blurbs predict whether films will pass the Bechdel test?
+excerpt: Do promotional descriptions (blurbs) predict whether movies will pass the Bechdel test?
 math: no
 meta: yes
-draft: true
+draft: false
 ---
 
 ```{r, include=FALSE}
-knitr::opts_chunk$set(eval = TRUE, warning = FALSE)
+knitr::opts_chunk$set(eval = TRUE, warning = TRUE, cache=TRUE)
 source(here::here("R","sidenote.R"))
 ```
 
-## Install relevant pacakges
+The Bechdel, or Bechdel-Wallace test, is a very simple rule for assessing the representation of women in film (or other media). Originally printed as a cartoon,`r sidenote_link("https://dykestowatchoutfor.com/the-rule/")` the test has three criteria:
 
+1. It (film/play/etc.) has to have at least two [named] women in it
+1. Who talk to each other
+1. About something besides a man
 
+Having seen two movies over the weekend and been disappointed by the fact that neither passed this test, I was interested in seeing if I could use machine learning to predict whether a movie is expected to pass the test based on its promotional blurb.`r sidenote("In retrospect, the term \"blurb\" may not be as well know as I initially thought - it is essentially a \"short promotional paragraph accompanying a piece of creative work\". I also liked the alliteration between Bechdel and Blurb.")` My focus on the blurb is that, at the time you are planning to go an see a movie, you will have little additional information available to you (e.g. things like meta-critic scores,  opening weekend box-offices or even the full script). Previous work has shown that models accounting for a range of factors are pretty good at predicting which movies will pass the test.`r sidenote_link("https://ai.plainenglish.io/predicting-bechdel-test-score-using-machine-learning-7253618a3f8")` However, for my uses, assuming that a script for the movie will be available on opening weekend isn't realistic.
+
+This also seemed like a great opportunity to explore the developing `tidymodels` framework for machine learning in R, as all my previous ML work had been in Python. Additionally, I was keen to try out a problem that had a particular focus on text processing.
+
+&nbsp;
 
 ## Load the data
 
-For this analysis, I used a TidyTuesday dataset on the Bechdel test. `r sidenote_link("https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-03-09/readme.md")``
+For this analysis, I initially used a TidyTuesday dataset on the Bechdel test.`r sidenote_link("https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-03-09/readme.md")` However, on inspection of the data, I decided to change the data munging a little to give me more data to work with. The TidyTuesday dataset is an intersection of data from three distinct data sources, meaning that the resulting dataset was quite small. As I didn't need the data in the final data source for my analysis, I choose two of the sources, one containing the details of the movie (name/blurb) and the other details on whether it passed the Bechdel test.  This approach turned out to be a good one, as it doubled the number of records I had to work with.
 
-```{r}
+```{r, message=FALSE}
 library(tidyverse)
 library(tidytext)
 
-tuesdata <- tidytuesdayR::tt_load('2021-03-09')
+cleaned_bechdel <-
+  # Parse data from Bechdel Test API
+  jsonlite::parse_json(url("http://bechdeltest.com/api/v1/getAllMovies")) %>%
+  map_dfr(~ as.data.frame(.x, stringsAsFactors = FALSE)) %>%
+  # Rename key and convert to tibble
+  rename(imdb_id = imdbid) %>%
+  tibble() %>%
+  # Remove
+  filter(year >= 1970) %>%
+  # Clean some odd strings, and quote symbols
+  mutate(
+    title =  ifelse(
+      str_detect(title, ", The"),
+      str_remove(title, ", The") %>% paste("The", .),
+      title
+    ),
+    title = str_replace_all(title, "&#39;|&quot;", ""),
+    title = str_replace_all(title, "&amp;", "&"),
+    title = str_replace_all(title, "&Aacute;", "")
+  ) %>%
+  # Select relevant columns
+  dplyr::select(imdb_id, title, rating)
 
-movies <- tuesdata$movies %>%
-  mutate(bechdel = binary) %>%
-  select(title, plot, imdb_rating, bechdel) %>%
-  filter(!is.na(plot) & !is.na(bechdel) & !is.na(imdb_rating)) %>%
-  mutate(text = plot) %>%
-  select(-plot)
+cleaned_imdb <-
+  # Use static snapshot of IMDB data, as scraping from API can be slow
+  jsonlite::parse_json(
+    url(
+      "https://raw.githubusercontent.com/brianckeegan/Bechdel/master/imdb_data.json"
+    )
+  ) %>%
+  map_dfr(~ as.data.frame(.x, stringsAsFactors = FALSE)) %>%
+  janitor::clean_names() %>%
+  # Select relevant columns
+  dplyr::select(imdb_id, plot) %>%
+  # Clean key variable and convert to tibble
+  mutate(imdb_id = str_remove(imdb_id, "tt")) %>%
+  tibble()
 
+# Merge datasets
+movies <- cleaned_bechdel %>%
+  dplyr::left_join(cleaned_imdb) %>%
+  dplyr::select(imdb_id, title, plot, rating) %>%
+  # Keep only records with no missing values
+  dplyr::filter(complete.cases(.)) %>%
+  dplyr::filter(plot != "N/A") %>%
+  dplyr::rename("text" = plot) %>%
+  # Generate binary factor for Bechdel PASS/FAIL
+  dplyr::mutate(bechdel = factor(
+    case_when(rating == 3 ~ "PASS",
+              T ~ "FAIL"),
+    levels = c("FAIL", "PASS")
+  )) %>%
+  dplyr::select(-c(imdb_id, rating)) %>%
+  dplyr::arrange(title)
+```
+
+This dataset contains less than half (N=`r nrow(movies)`) of the total number of movies in the Bechdel database (N=`r nrow(cleaned_bechdel)`), largely because the static IMDB dataset I used didn't contain blurbs for all records included in the Bechdel data. A good step here would have been download the missing data from the IMDB API, but as this wasn't the focus of this post, I moved on.
+
+So now we have our final cleaned dataset, which is explorable via the `reactable` table below. You can see if the data contains a specific movie by using the search bar at the top.
+
+```{r, echo = FALSE}
+reactable::reactable(movies,
+                     searchable = TRUE,
+                     bordered = TRUE,
+  highlight = TRUE,
+  defaultPageSize = 5,
+  width = "87.5%",
+  theme = reactable::reactableTheme(
+    backgroundColor = "#f5f5f5",
+    borderColor = "#111",
+    searchInputStyle = list(width = "100%")  
+  ))
+```
+
+One last thing to note is that the data from the Bechdel API are community-contributed ratings. As such, there is a possibility that some of the movies have been misclassified. There is nothing we can do about that here, but good to have in the back of your head.
+
+&nbsp;
+
+## Exploring the data
+
+I was initially curious to see how many words were in each blurb:
+
+```{r}
 # Number of words per movie blurb
 movies %>%
   unnest_tokens(word, text) %>%
   count(title, name = "total_words") %>%
   ggplot(aes(total_words)) +
-  geom_histogram(fill = "darkorange2", alpha = 0.8) +
-  theme_minimal()
-
-
-movies %>%
-  ggplot(aes(y = imdb_rating, x = bechdel)) +
-  geom_boxplot() +
+  geom_bar(fill = "darkorange2", alpha = 0.8) +
   theme_minimal()
 ```
 
-I also wanted to have a quick look at the balance between the two outcomes (Pass/Fail) to ensure the dataset was relatively well balanced.
+It seems that most records have blurbs of between 15 and 30 words, so not a huge amount to work with, particularly once you have removed stop words which we'll come to later.
+
+I also wanted to have a quick look at the number of movies with the two outcomes (Pass/Fail) to ensure the dataset was relatively well balanced.
 
 ```{r}
 # Number of movies that pass/fail
@@ -66,122 +144,212 @@ movies %>%
   geom_bar(stat = "count", fill = "darkorange2", alpha = 0.8) +
   theme_minimal()
 
+# Proportion of movies that pass/fail
 prop.table(table(movies$bechdel))
 ```
 
-It seems there are a few more movies that fail the test, but the split is not too far off 50/50.
+It seems there are more movies in the dataset pass the test than fail it (by a 60/40 split), indicating that we may need to do some imbalanced sampling when training our model. Of interest, this finding goes against what I had expected, as my reading around this topic had suggested that a majority of movies fail the test rather than pass it, the opposite of what we see in this dataset. This again may point to some bias in the data accessible via the Bechdel test API (movies that pass may be more likely to reported to the site behind the API, and so passing movies are over-represented).`r sidenote("This is a type of selection bias, and may limited the how generalizable the model is to real-world movies.")`
 
-### Build a model
+&nbsp;
+
+## Build a model
 
 First things first, split the data into training and testing dataset, using the default split of 3/4 training and 1/4 testing.
 
-`r tufte::margin_note("I like using The Answer to the Ultimate Question of Life, the Universe, and Everything a a seed.")`
+I also created some bootstrapped samples of the training dataset, which are used later to tune and evaluate model performance.
 
-```{r}
+`r tufte::margin_note("I like using _The Answer to the Ultimate Question of Life, the Universe, and Everything_ as the seed.")`
+
+```{r, message=FALSE}
 library(tidymodels)
 
 set.seed(42)
-review_split <- initial_split(movies, strata = bechdel)
-review_train <- training(review_split)
-review_test <- testing(review_split)
+# Split data into training and testing sets
+movie_split <- initial_split(movies, strata = bechdel)
+movie_train <- training(movie_split)
+movie_test <- testing(movie_split)
+
+# Create 25 bootstrapped samples from the training data
+movie_folds <- bootstraps(movie_train, strata = bechdel)
+movie_folds
 ```
 
-Next, I made use of the amazing 
+Once we have our training/test split, the first step is to prepare a feature processing receipe. This makes heavy use of the additional processing steps for text which are available from the `textrecipes` package.
 
-```{r}
+```{r, message = FALSE}
 library(textrecipes)
 library(stopwords)
 
-review_rec <- recipe(bechdel ~ text + imdb_rating, data = review_train) %>%
+blurb_recipe <- 
+  # Define the formula and the training data
+  recipe(bechdel ~ text, data = movie_train) %>%
+  # Down-sample to balance classes
+  themis::step_downsample(bechdel) %>%
+  # Process text feature
   step_tokenize(text) %>%
   step_stopwords(text) %>%
-  step_tokenfilter(text, max_tokens = 500) %>%
+  step_tokenfilter(text, max_tokens = 2000) %>%
   step_tfidf(text) %>%
+  # Normalise all predictors, as glmnet is sensitive to this
   step_normalize(all_predictors())
-
-review_prep <- prep(review_rec)
-
-review_prep
-
 ```
 
-###
+Next, we specify the model (`logistic_reg()`, with a mixture of `1` meaning it is a pure lasso model) and the engine (`glmnet`), and combined this specification into a workflow along with the preprocessing steps define above. This (to my mind) is one of the best parts of the `tidymodels` set-up - it's really easy to package everything up together in a workflow.
 
 ```{r}
 lasso_spec <- logistic_reg(penalty = tune(), mixture = 1) %>%
   set_engine("glmnet")
 
 lasso_wf <- workflow() %>%
-  add_recipe(review_rec) %>%
+  # Add the preprocessing recipe
+  add_recipe(blurb_recipe) %>%
+  # Add the model specification
   add_model(lasso_spec)
 
 lasso_wf
 ```
 
+&nbsp;
 
-`r tufte::margin_note("You may need the development version of <code>recipes</code> for this to work, as per [this issue](https://github.com/tidymodels/tune/issues/192)")`
 
-```{r, cache=TRUE}
+## Tune the model
+
+Now that the workflow is ready, it is time to tune it by finding the best penalty value to use in the model (currently denoted by the `tune()` placeholder in the workflow summary above). We first create a list of possible penalties using `grid_regular()`, and then combine this with the finalised workflow and the bootstrapped training datasets. 
+
+Plotting the resulting metrics is a useful way to investigate the effects of the varying penalty strength.
+
+`r tufte::margin_note("You may need the development version of <code>recipes</code> for this to work, as per [this issue.](https://github.com/tidymodels/tune/issues/192)")`
+
+```{r}
+# Create grid of possible penalties
 lambda_grid <- grid_regular(penalty(), levels = 40)
 
-set.seed(42)
-review_folds <- bootstraps(review_train, strata = bechdel)
-review_folds
-
+# Register 
 doParallel::registerDoParallel()
 
-set.seed(2020)
+# Calculate ROC_AUC, PPV, NPV for each penalty on bootstrapped data
+set.seed(42)
 lasso_grid <- tune_grid(
   lasso_wf,
-  resamples = review_folds,
+  resamples = movie_folds,
   grid = lambda_grid,
   metrics = metric_set(roc_auc, ppv, npv)
 )
 
+# Plot resulting metrics
 lasso_grid %>%
-  collect_metrics()
+  collect_metrics() %>%
+  ggplot(aes(penalty, mean, color = .metric)) +
+  geom_line(size = 1.5, show.legend = FALSE) +
+  facet_wrap(~.metric) +
+  scale_x_log10()
 ```
 
+This shows that regularisation had some benefit across all metrics, and that we could pick the best model on the basis of any of the metrics. It also shows, by comparing the NPV and PPV, that one class is harder to predict than the other. 
 
+Next, we will use the grid to select the best final model based on the best ROC-AUC (i.e. best balance of sensitivity and specificity), apply it to the bootstrapped samples of the training dataset created above, and collect performance metrics.
 
 ```{r}
 best_auc <- lasso_grid %>%
   select_best("roc_auc")
 
-best_auc
-
 final_lasso <- finalize_workflow(lasso_wf, best_auc)
 
-final_lasso
+# Fit to bootstrapped samples and collect performance metrics
+fit_resamples(final_lasso, movie_folds) %>% collect_metrics()
+```
 
+The accuracy here is fairly poor and not very different from chance, indicating that the model has low predictive power.
+
+&nbsp;
+
+## Investigating model characteristics
+
+At this point, I was interested to see what the model considers to be the most important variables in terms of predicting whether or not a movie passes the test. This is useful as a sanity check, to ensure that you haven't forgotten anything important.`r sidenote("For example, forgetting to remove stopwords during preprocessing, or having your outcome coding reversed.")` In this case, we can use the `vip` package to visualise the relative importance of each token. 
+
+```{r importance}
 library(vip)
 
-# final_lasso %>%
-#   fit(review_train) %>%
-#   pull_workflow_fit() %>%
-#   vi(lambda = best_auc$penalty) %>%
-#   group_by(Sign) %>%
-#   arrange(desc(abs(Importance))) %>%
-#   slice(1:20) %>%
-#   ungroup() %>%
-#   mutate(
-#     Importance = abs(Importance),
-#     Variable = str_remove(Variable, "tfidf_text_"),
-#     Variable = fct_reorder(Variable, Importance)
-#   ) %>%
-#   ggplot(aes(x = Importance, y = Variable, fill = Sign)) +
-#   geom_col(show.legend = FALSE) +
-#   facet_wrap(~Sign, scales = "free_y") +
-#   labs(y = NULL)
+# Get most important aspects
+importance <- final_lasso %>%
+  fit(movie_train) %>%
+  pull_workflow_fit() %>%
+  vi(lambda = best_auc$penalty) %>%
+  group_by(Sign) %>%
+  top_n(20, wt = abs(Importance)) %>%
+  ungroup() %>%
+  mutate(
+    Importance = abs(Importance),
+    Variable = str_remove(Variable, "tfidf_text_"),
+    Variable = fct_reorder(Variable, Importance)
+  ) %>%
+  arrange(Sign, desc(Importance)) 
 
-
-review_final <- last_fit(final_lasso, review_split)
-
-review_final %>%
-  collect_metrics()
-
-review_final %>%
-  collect_predictions() %>%
-  conf_mat(bechdel, .pred_class)
+ggplot(importance, aes(x = Importance, y = Variable, fill = Sign)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~Sign, scales = "free_y") +
+  labs(y = NULL)
 
 ```
+
+Movies with blurbs that describe "girl(s)", "women", "mother" and "sister(s)" are likely to pass the test, while movies about "men", "boys" and "action" are less likely to pass, which seems sensible.
+
+I also wanted to see how much information the model had access to for each record, once stop words were removed:
+
+```{r}
+# Get number of tokens per record when stop-words are removed
+movies %>%
+  unnest_tokens(word, text) %>%
+  filter(!(word  %in% tidytext::stop_words$word)) %>%
+  count(title, name = "total_words") %>%
+  pull(total_words) %>%
+  median()
+```
+
+This shows that once the stopwords are removed in the `step_stopwords()` element of the preprocessing recipe, there aren't a whole host of tokens left for the model to base the classification on. This could be one of the reasons for the poor performance.
+
+&nbsp;
+
+## Apply to test dataset
+
+While we expect the model to perform poorly on the test dataset given the metrics obtained while training, I wanted to work through this analysis to the end. Using `last_fit()`, I combined the finalised model with the movie data split, and collect the metrics from the test dataset.
+
+```{r}
+# Once happy with the model, apply it to test data.
+movie_final <- last_fit(final_lasso, movie_split)
+
+# Get accuracy/ROC
+movie_final %>%
+  collect_metrics()
+```
+
+We can see that we didn't overfit during training, as the model metrics when applied to the training and the test datasets are similar, but the overall accuracy is low.
+
+A good next step is to produce a confusion matrix to investigate whether a certain class is easier to predict.
+
+```{r}
+
+# Produce confusion matrix and statistics based on it
+conf_mat <- movie_final %>%
+  collect_predictions() %>%
+  conf_mat(bechdel, .pred_class) 
+
+conf_mat
+```
+
+We can then pass this to the `summary()` function to collect a range of metrics on model performance. Of note, we need to set the `event_level` argument to "second" so that metrics are calculated with reference to the PASS outcome.
+
+```{r}
+conf_mat %>%
+  summary(event_level = "second")
+```
+
+The poor overall accuracy is supported by a low kappa showing "slight" agreement. Additionally, the model finds it easier to predict which movies will fail the test (specificity = 0.74) rather than those that pass the test (sensitivity = 0.49).
+
+&nbsp;
+
+## Saving the model and predicting on new data
+
+I had planned to convert this work into a Shiny application where users could input the blurb of a movie and get a prediction on whether it was expected to pass the test. However, given the poor performance of the model, I decide not to pursue this. 
+
+Regardless, this was a really interesting analysis, and it gave me an excuse to explore the `tidymodels` framework, which I think I am going to use a lot more from know on! 

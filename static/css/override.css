@@ -6,7 +6,7 @@ body{
     color: inherit;
 }
 
-.hljs-string {
+.hljs-string, .hljs-number {
   color: darkred;
 }
 
@@ -28,7 +28,6 @@ code {
   line-height: 1.6; 
 }
 
-
 pre code {
   width: 100% !important;
   padding-left: 0 !important; 
@@ -36,6 +35,13 @@ pre code {
 
 pre {
   width: 55%;
+  border-color: #444;
+  
+    background-color: #fff;
+}
+
+pre:not(.r) {
+    border-color: #ccc;
 }
 
 label.margin-toggle {

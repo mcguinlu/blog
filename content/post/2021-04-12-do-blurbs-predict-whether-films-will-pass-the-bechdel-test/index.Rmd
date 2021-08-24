@@ -17,7 +17,7 @@ draft: false
 ---
 
 ```{r, include=FALSE}
-knitr::opts_chunk$set(eval = TRUE, warning = TRUE, cache=TRUE)
+knitr::opts_chunk$set(eval = TRUE, warning = FALSE)
 source(here::here("R","sidenote.R"))
 ```
 
@@ -27,7 +27,7 @@ The Bechdel, or Bechdel-Wallace test, is a very simple rule for assessing the re
 1. Who talk to each other
 1. About something besides a man
 
-Having seen two movies over the weekend and been disappointed by the fact that neither passed this test, I was interested in seeing if I could use machine learning to predict whether a movie is expected to pass the test based on its promotional blurb.`r sidenote("In retrospect, the term \"blurb\" may not be as well know as I initially thought - it is essentially a \"short promotional paragraph accompanying a piece of creative work\". I also liked the alliteration between Bechdel and Blurb.")` My focus on the blurb is that, at the time you are planning to go an see a movie, you will have little additional information available to you (e.g. things like meta-critic scores,  opening weekend box-offices or even the full script). Previous work has shown that models accounting for a range of factors are pretty good at predicting which movies will pass the test.`r sidenote_link("https://ai.plainenglish.io/predicting-bechdel-test-score-using-machine-learning-7253618a3f8")` However, for my uses, assuming that a script for the movie will be available on opening weekend isn't realistic.
+Having seen two movies over the weekend and been disappointed by the fact that neither passed this test, I was interested in seeing if I could use machine learning to predict whether a movie is expected to pass the test based on its promotional blurb.`r sidenote("In retrospect, the term \"blurb\" may not be as well known as I initially thought - it is essentially a \"short promotional paragraph accompanying a piece of creative work\". I also liked the alliteration between Bechdel and Blurb.")` My focus on the blurb is that, at the time you are planning to go an see a movie, you will have little additional information available to you (e.g. things like meta-critic scores,  opening weekend box-offices or even the full script). Previous work has shown that models accounting for a range of factors are pretty good at predicting which movies will pass the test.`r sidenote_link("https://ai.plainenglish.io/predicting-bechdel-test-score-using-machine-learning-7253618a3f8")` However, for my uses, assuming that a script for the movie will be available on opening weekend isn't realistic.
 
 This also seemed like a great opportunity to explore the developing `tidymodels` framework for machine learning in R, as all my previous ML work had been in Python. Additionally, I was keen to try out a problem that had a particular focus on text processing.
 
@@ -267,7 +267,7 @@ The accuracy here is fairly poor and not very different from chance, indicating 
 
 At this point, I was interested to see what the model considers to be the most important variables in terms of predicting whether or not a movie passes the test. This is useful as a sanity check, to ensure that you haven't forgotten anything important.`r sidenote("For example, forgetting to remove stopwords during preprocessing, or having your outcome coding reversed.")` In this case, we can use the `vip` package to visualise the relative importance of each token. 
 
-```{r importance}
+```{r importance, message=FALSE}
 library(vip)
 
 # Get most important aspects
@@ -292,7 +292,7 @@ ggplot(importance, aes(x = Importance, y = Variable, fill = Sign)) +
 
 ```
 
-Movies with blurbs that describe "girl(s)", "women", "mother" and "sister(s)" are likely to pass the test, while movies about "men", "boys" and "action" are less likely to pass, which seems sensible.
+Movies with blurbs that pass the test describe "girl(s)", "women", "mother" and "sister(s)" are likely to pass the test, while movies about "men", "boys" and "action" are less likely to pass, which seems sensible.
 
 I also wanted to see how much information the model had access to for each record, once stop words were removed:
 
@@ -344,7 +344,7 @@ conf_mat %>%
   summary(event_level = "second")
 ```
 
-The poor overall accuracy is supported by a low kappa showing "slight" agreement. Additionally, the model finds it easier to predict which movies will fail the test (specificity = 0.74) rather than those that pass the test (sensitivity = 0.49).
+The poor overall accuracy is supported by a low kappa showing "slight" agreement. Additionally, the model finds it easier to predict which movies will fail the test (higher specificity) rather than those that pass the test (lower sensitivity).
 
 &nbsp;
 

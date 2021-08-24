@@ -31,23 +31,16 @@ draft: false
 <li>Who talk to each other</li>
 <li>About something besides a man</li>
 </ol>
-<p>Having seen two movies over the weekend and been disappointed by the fact that neither passed this test, I was interested in seeing if I could use machine learning to predict whether a movie is expected to pass the test based on its promotional blurb.<span class="sidenote-number"></span><span class="sidenote">In retrospect, the term “blurb” may not be as well know as I initially thought - it is essentially a “short promotional paragraph accompanying a piece of creative work”. I also liked the alliteration between Bechdel and Blurb.</span> My focus on the blurb is that, at the time you are planning to go an see a movie, you will have little additional information available to you (e.g. things like meta-critic scores, opening weekend box-offices or even the full script). Previous work has shown that models accounting for a range of factors are pretty good at predicting which movies will pass the test.<span class="sidenote-number"></span><span class="sidenote">See <a href = "https://ai.plainenglish.io/predicting-bechdel-test-score-using-machine-learning-7253618a3f8">here</a>.</span> However, for my uses, assuming that a script for the movie will be available on opening weekend isn’t realistic.</p>
+<p>Having seen two movies over the weekend and been disappointed by the fact that neither passed this test, I was interested in seeing if I could use machine learning to predict whether a movie is expected to pass the test based on its promotional blurb.<span class="sidenote-number"></span><span class="sidenote">In retrospect, the term “blurb” may not be as well known as I initially thought - it is essentially a “short promotional paragraph accompanying a piece of creative work”. I also liked the alliteration between Bechdel and Blurb.</span> My focus on the blurb is that, at the time you are planning to go an see a movie, you will have little additional information available to you (e.g. things like meta-critic scores, opening weekend box-offices or even the full script). Previous work has shown that models accounting for a range of factors are pretty good at predicting which movies will pass the test.<span class="sidenote-number"></span><span class="sidenote">See <a href = "https://ai.plainenglish.io/predicting-bechdel-test-score-using-machine-learning-7253618a3f8">here</a>.</span> However, for my uses, assuming that a script for the movie will be available on opening weekend isn’t realistic.</p>
 <p>This also seemed like a great opportunity to explore the developing <code>tidymodels</code> framework for machine learning in R, as all my previous ML work had been in Python. Additionally, I was keen to try out a problem that had a particular focus on text processing.</p>
 <p> </p>
 <div id="load-the-data" class="section level2">
 <h2>Load the data</h2>
 <p>For this analysis, I initially used a TidyTuesday dataset on the Bechdel test.<span class="sidenote-number"></span><span class="sidenote">See <a href = "https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-03-09/readme.md">here</a>.</span> However, on inspection of the data, I decided to change the data munging a little to give me more data to work with. The TidyTuesday dataset is an intersection of data from three distinct data sources, meaning that the resulting dataset was quite small. As I didn’t need the data in the final data source for my analysis, I choose two of the sources, one containing the details of the movie (name/blurb) and the other details on whether it passed the Bechdel test. This approach turned out to be a good one, as it doubled the number of records I had to work with.</p>
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## Warning: package &#39;tibble&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;tidyr&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;readr&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;purrr&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;stringr&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;forcats&#39; was built under R version 3.6.3</code></pre>
-<pre class="r"><code>library(tidytext)</code></pre>
-<pre><code>## Warning: package &#39;tidytext&#39; was built under R version 3.6.2</code></pre>
-<pre class="r"><code>cleaned_bechdel &lt;-
+<pre class="r"><code>library(tidyverse)
+library(tidytext)
+
+cleaned_bechdel &lt;-
   # Parse data from Bechdel Test API
   jsonlite::parse_json(url(&quot;http://bechdeltest.com/api/v1/getAllMovies&quot;)) %&gt;%
   map_dfr(~ as.data.frame(.x, stringsAsFactors = FALSE)) %&gt;%
@@ -140,19 +133,9 @@ prop.table(table(movies$bechdel))</code></pre>
 <p>First things first, split the data into training and testing dataset, using the default split of 3/4 training and 1/4 testing.</p>
 <p>I also created some bootstrapped samples of the training dataset, which are used later to tune and evaluate model performance.</p>
 <p><label for="tufte-mn-" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-" class="margin-toggle"><span class="marginnote">I like using <em>The Answer to the Ultimate Question of Life, the Universe, and Everything</em> as the seed.</span></p>
-<pre class="r"><code>library(tidymodels)</code></pre>
-<pre><code>## Warning: package &#39;tidymodels&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;broom&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;dials&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;infer&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;modeldata&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;parsnip&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;recipes&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;rsample&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;tune&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;workflows&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;yardstick&#39; was built under R version 3.6.3</code></pre>
-<pre class="r"><code>set.seed(42)
+<pre class="r"><code>library(tidymodels)
+
+set.seed(42)
 # Split data into training and testing sets
 movie_split &lt;- initial_split(movies, strata = bechdel)
 movie_train &lt;- training(movie_split)
@@ -177,11 +160,10 @@ movie_folds</code></pre>
 ## 10 &lt;split [3118/1137]&gt; Bootstrap10
 ## # ... with 15 more rows</code></pre>
 <p>Once we have our training/test split, the first step is to prepare a feature processing receipe. This makes heavy use of the additional processing steps for text which are available from the <code>textrecipes</code> package.</p>
-<pre class="r"><code>library(textrecipes)</code></pre>
-<pre><code>## Warning: package &#39;textrecipes&#39; was built under R version 3.6.3</code></pre>
-<pre class="r"><code>library(stopwords)</code></pre>
-<pre><code>## Warning: package &#39;stopwords&#39; was built under R version 3.6.2</code></pre>
-<pre class="r"><code>blurb_recipe &lt;- 
+<pre class="r"><code>library(textrecipes)
+library(stopwords)
+
+blurb_recipe &lt;- 
   # Define the formula and the training data
   recipe(bechdel ~ text, data = movie_train) %&gt;%
   # Down-sample to balance classes
@@ -255,7 +237,6 @@ lasso_grid %&gt;%
   geom_line(size = 1.5, show.legend = FALSE) +
   facet_wrap(~.metric) +
   scale_x_log10()</code></pre>
-<pre><code>## Warning: Removed 5 row(s) containing missing values (geom_path).</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <p>This shows that regularisation had some benefit across all metrics, and that we could pick the best model on the basis of any of the metrics. It also shows, by comparing the NPV and PPV, that one class is harder to predict than the other.</p>
 <p>Next, we will use the grid to select the best final model based on the best ROC-AUC (i.e. best balance of sensitivity and specificity), apply it to the bootstrapped samples of the training dataset created above, and collect performance metrics.</p>
@@ -299,7 +280,7 @@ ggplot(importance, aes(x = Importance, y = Variable, fill = Sign)) +
   facet_wrap(~Sign, scales = &quot;free_y&quot;) +
   labs(y = NULL)</code></pre>
 <p><img src="index_files/figure-html/importance-1.png" width="672" /></p>
-<p>Movies with blurbs that describe “girl(s)”, “women”, “mother” and “sister(s)” are likely to pass the test, while movies about “men”, “boys” and “action” are less likely to pass, which seems sensible.</p>
+<p>Movies with blurbs that pass the test describe “girl(s)”, “women”, “mother” and “sister(s)” are likely to pass the test, while movies about “men”, “boys” and “action” are less likely to pass, which seems sensible.</p>
 <p>I also wanted to see how much information the model had access to for each record, once stop words were removed:</p>
 <pre class="r"><code># Get number of tokens per record when stop-words are removed
 movies %&gt;%
@@ -316,18 +297,16 @@ movies %&gt;%
 <h2>Apply to test dataset</h2>
 <p>While we expect the model to perform poorly on the test dataset given the metrics obtained while training, I wanted to work through this analysis to the end. Using <code>last_fit()</code>, I combined the finalised model with the movie data split, and collect the metrics from the test dataset.</p>
 <pre class="r"><code># Once happy with the model, apply it to test data.
-movie_final &lt;- last_fit(final_lasso, movie_split)</code></pre>
-<pre><code>## Warning: package &#39;rlang&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;vctrs&#39; was built under R version 3.6.3</code></pre>
-<pre><code>## Warning: package &#39;glmnet&#39; was built under R version 3.6.3</code></pre>
-<pre class="r"><code># Get accuracy/ROC
+movie_final &lt;- last_fit(final_lasso, movie_split)
+
+# Get accuracy/ROC
 movie_final %&gt;%
   collect_metrics()</code></pre>
 <pre><code>## # A tibble: 2 x 4
 ##   .metric  .estimator .estimate .config             
 ##   &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt; &lt;fct&gt;               
 ## 1 accuracy binary         0.591 Preprocessor1_Model1
-## 2 roc_auc  binary         0.669 Preprocessor1_Model1</code></pre>
+## 2 roc_auc  binary         0.665 Preprocessor1_Model1</code></pre>
 <p>We can see that we didn’t overfit during training, as the model metrics when applied to the training and the test datasets are similar, but the overall accuracy is low.</p>
 <p>A good next step is to produce a confusion matrix to investigate whether a certain class is easier to predict.</p>
 <pre class="r"><code># Produce confusion matrix and statistics based on it
@@ -338,8 +317,8 @@ conf_mat &lt;- movie_final %&gt;%
 conf_mat</code></pre>
 <pre><code>##           Truth
 ## Prediction FAIL PASS
-##       FAIL  302  320
-##       PASS  105  312</code></pre>
+##       FAIL  296  314
+##       PASS  111  318</code></pre>
 <p>We can then pass this to the <code>summary()</code> function to collect a range of metrics on model performance. Of note, we need to set the <code>event_level</code> argument to “second” so that metrics are calculated with reference to the PASS outcome.</p>
 <pre class="r"><code>conf_mat %&gt;%
   summary(event_level = &quot;second&quot;)</code></pre>
@@ -347,19 +326,19 @@ conf_mat</code></pre>
 ##    .metric              .estimator .estimate
 ##    &lt;chr&gt;                &lt;chr&gt;          &lt;dbl&gt;
 ##  1 accuracy             binary         0.591
-##  2 kap                  binary         0.215
-##  3 sens                 binary         0.494
-##  4 spec                 binary         0.742
-##  5 ppv                  binary         0.748
-##  6 npv                  binary         0.486
-##  7 mcc                  binary         0.235
-##  8 j_index              binary         0.236
-##  9 bal_accuracy         binary         0.618
-## 10 detection_prevalence binary         0.401
-## 11 precision            binary         0.748
-## 12 recall               binary         0.494
-## 13 f_meas               binary         0.595</code></pre>
-<p>The poor overall accuracy is supported by a low kappa showing “slight” agreement. Additionally, the model finds it easier to predict which movies will fail the test (specificity = 0.74) rather than those that pass the test (sensitivity = 0.49).</p>
+##  2 kap                  binary         0.212
+##  3 sens                 binary         0.503
+##  4 spec                 binary         0.727
+##  5 ppv                  binary         0.741
+##  6 npv                  binary         0.485
+##  7 mcc                  binary         0.228
+##  8 j_index              binary         0.230
+##  9 bal_accuracy         binary         0.615
+## 10 detection_prevalence binary         0.413
+## 11 precision            binary         0.741
+## 12 recall               binary         0.503
+## 13 f_meas               binary         0.599</code></pre>
+<p>The poor overall accuracy is supported by a low kappa showing “slight” agreement. Additionally, the model finds it easier to predict which movies will fail the test (higher specificity) rather than those that pass the test (lower sensitivity).</p>
 <p> </p>
 </div>
 <div id="saving-the-model-and-predicting-on-new-data" class="section level2">
